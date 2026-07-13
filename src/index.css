@@ -2,6 +2,8 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 
 :root {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -45,6 +47,11 @@ body {
 
 /* Print CSS to make invoices clean and formatted */
 @media print {
+  html, body, #root, .flex, .flex-1, main, .overflow-y-auto {
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
   body {
     background-color: #ffffff !important;
     color: #000000 !important;
@@ -62,6 +69,23 @@ body {
     margin: 0 !important;
     background: white !important;
     color: black !important;
+  }
+  /* Invoice print mode overrides */
+  body.print-mode-invoice aside,
+  body.print-mode-invoice header,
+  body.print-mode-invoice .no-print-invoice {
+    display: none !important;
+  }
+  body.print-mode-invoice .invoice-print-wrapper {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
   }
 }
 

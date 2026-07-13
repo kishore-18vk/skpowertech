@@ -200,20 +200,23 @@ export const AppProvider = ({ children }) => {
 
     // Auto-calculate profit, total amount, and warranty
     const qty = parseInt(saleData.quantity);
-    const sPrice = parseFloat(saleData.sellingPrice) || product.sellingPrice;
+    const totalAmount = saleData.totalAmount ? parseFloat(saleData.totalAmount) : (parseFloat(saleData.sellingPrice) || product.sellingPrice) * qty;
+    const sPrice = totalAmount / qty;
     const pPrice = product.purchasePrice;
-    const totalAmount = sPrice * qty;
-    const profitAmount = (sPrice - pPrice) * qty;
+    const profitAmount = totalAmount - (pPrice * qty);
+
+    const amountPaid = saleData.amountPaid !== undefined ? parseFloat(saleData.amountPaid) : (saleData.paymentStatus === 'Paid' ? totalAmount : 0);
+    const dueAmount = saleData.dueAmount !== undefined ? parseFloat(saleData.dueAmount) : (totalAmount - amountPaid);
 
     // Define warranty parameters based on category
-    let warrantyDuration = 12; // default 12 months
-    if (product.category === 'Solar Water Heater') {
-      warrantyDuration = 60; // 5 years
-    } else if (product.category === 'UPS') {
+    let warrantyDuration = 0; // default to 0 (no warranty)
+    if (product.category === 'UPS') {
       warrantyDuration = 24; // 2 years
+    } else if (product.category === 'Water Purifier') {
+      warrantyDuration = 12; // 12 months
     }
 
-    const warrantyExpiry = calculateExpiryDate(saleData.date, warrantyDuration);
+    const warrantyExpiry = warrantyDuration > 0 ? calculateExpiryDate(saleData.date, warrantyDuration) : "";
 
     const newSale = {
       id: `sale-${Date.now()}`,
@@ -225,6 +228,8 @@ export const AppProvider = ({ children }) => {
       purchasePrice: pPrice,
       totalAmount,
       profitAmount,
+      amountPaid,
+      dueAmount,
       warrantyDuration,
       warrantyExpiry,
       installationStatus: product.category === 'Solar Water Heater' ? 'Scheduled' : 'Completed',

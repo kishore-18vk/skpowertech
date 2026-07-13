@@ -2,10 +2,13 @@ import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { formatCurrency, exportToCSV, getMonthYearString } from '../utils/helpers';
 import { Calendar, Download, Printer, FileText, ArrowRight, ShieldCheck, Sun, Droplet, Zap, Battery } from 'lucide-react';
+import InvoiceModal from './InvoiceModal';
+import logo from '../assets/logo.jpeg';
 
 const ReportsView = () => {
   const { sales } = useContext(AppContext);
   const [selectedMonth, setSelectedMonth] = useState('2026-07'); // Default to target month
+  const [activeInvoice, setActiveInvoice] = useState(null);
 
   // Filter sales by selected month
   const monthlySales = sales.filter(s => s.date && s.date.startsWith(selectedMonth));
@@ -29,6 +32,9 @@ const ReportsView = () => {
   const totalRevenue = Object.values(reportSummary).reduce((acc, curr) => acc + curr.revenue, 0);
   const totalProfit = Object.values(reportSummary).reduce((acc, curr) => acc + curr.profit, 0);
   const totalSold = Object.values(reportSummary).reduce((acc, curr) => acc + curr.qty, 0);
+
+  const totalOutstanding = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.dueAmount) || 0), 0);
+  const totalPaid = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.amountPaid) || 0), 0);
 
   // Available months list from sales history to filter
   const uniqueMonths = Array.from(new Set(sales.map(s => s.date.substring(0, 7)))).sort().reverse();
@@ -60,6 +66,7 @@ const ReportsView = () => {
 
   return (
     <div className="space-y-6 animate-fade-in text-left">
+      <div className="no-print-invoice space-y-6">
       
       {/* Selection & Export toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm no-print">
@@ -111,8 +118,8 @@ const ReportsView = () => {
         <div className="flex items-start justify-between pb-6 border-b border-slate-100 dark:border-slate-800/80">
           <div>
             <div className="flex items-center space-x-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold text-base">SK</div>
-              <span className="font-display font-black text-base text-slate-800 dark:text-white">SK Powertech Solutions</span>
+              <img src={logo} alt="SK Powertech Logo" className="w-8 h-8 object-contain bg-white p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm" />
+              <span className="font-display font-black text-base text-slate-800 dark:text-white">S.K. Power Tech</span>
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Solar Systems, Water Purifiers & Backup UPS</p>
           </div>
@@ -162,7 +169,7 @@ const ReportsView = () => {
         </div>
 
         {/* Ledger Summary and Sign-off */}
-        <div className="bg-slate-950 text-white rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="bg-slate-950 text-white rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-1">
             <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Grand Statement Totals</span>
             <div className="flex items-baseline space-x-3">
@@ -173,8 +180,16 @@ const ReportsView = () => {
             </div>
             <p className="text-[10px] text-slate-400">Aggregated from {monthlySales.length} billing records</p>
           </div>
+
+          <div className="md:border-l md:border-slate-800 md:pl-6 text-left">
+            <span className="text-[10px] font-bold tracking-widest text-slate-405 uppercase">Outstanding Due</span>
+            <h4 className={`font-display font-extrabold text-xl ${totalOutstanding > 0 ? 'text-amber-400' : 'text-slate-400'}`}>
+              {formatCurrency(totalOutstanding)}
+            </h4>
+            <span className="text-[10px] text-slate-400 font-semibold block">Settled Amount: {formatCurrency(totalPaid)}</span>
+          </div>
           
-          <div className="sm:border-l sm:border-slate-800 sm:pl-6 text-left">
+          <div className="md:border-l md:border-slate-800 md:pl-6 text-left">
             <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Gross Operating Profit</span>
             <h4 className="font-display font-extrabold text-xl text-emerald-400">
               {formatCurrency(totalProfit)}
@@ -182,7 +197,6 @@ const ReportsView = () => {
             <span className="text-[10px] text-slate-400 font-semibold block">Avg Profit Margin: {totalRevenue ? Math.round((totalProfit / totalRevenue) * 100) : 0}%</span>
           </div>
         </div>
-
         {/* Transaction History Sub-table */}
         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
           <h4 className="font-display font-bold text-xs text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-4">
@@ -199,28 +213,69 @@ const ReportsView = () => {
                 <thead>
                   <tr className="border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase">
                     <th className="py-2">Date</th>
-                    <th className="py-2">Customer</th>
+                    <th className="py-2">Customer Details (Click for PDF)</th>
                     <th className="py-2">Equipment Category</th>
-                    <th className="py-2 text-right">Units</th>
+                    <th className="py-2 text-center">Units</th>
                     <th className="py-2 text-right">Total Invoice</th>
-                    <th className="py-2 text-right">Total Profit</th>
+                    <th className="py-2 text-right">Amount Paid</th>
+                    <th className="py-2 text-right">Remaining Due</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
                   {monthlySales.map(sale => (
-                    <tr key={sale.id} className="text-slate-600 dark:text-slate-300">
-                      <td className="py-2.5 font-mono">{sale.date}</td>
-                      <td className="py-2.5 font-semibold text-slate-800 dark:text-white">{sale.customerName}</td>
-                      <td className="py-2.5">{sale.productName}</td>
-                      <td className="py-2.5 text-right font-medium">{sale.quantity}</td>
-                      <td className="py-2.5 text-right font-bold text-slate-800 dark:text-white">{formatCurrency(sale.totalAmount)}</td>
-                      <td className="py-2.5 text-right font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(sale.profitAmount)}</td>
+                    <tr key={sale.id} className="text-slate-600 dark:text-slate-350 hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+                      <td className="py-3 font-mono text-[11px] whitespace-nowrap">{sale.date}</td>
+                      <td 
+                        className="py-3 cursor-pointer group"
+                        onClick={() => setActiveInvoice(sale)}
+                      >
+                        <div className="font-bold text-slate-800 dark:text-white text-xs group-hover:text-indigo-650 dark:group-hover:text-indigo-400 group-hover:underline transition-colors flex items-center space-x-1.5">
+                          <span>{sale.customerName}</span>
+                          <span className="text-[9px] font-semibold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-all duration-150">PDF Invoice</span>
+                        </div>
+                        <div className="text-[10px] text-slate-400 space-y-0.5 mt-0.5">
+                          {sale.customerPhone && <div className="block">Ph: {sale.customerPhone}</div>}
+                          {sale.customerEmail && <div className="block">Email: {sale.customerEmail}</div>}
+                          {sale.customerGstin && <div className="block font-mono text-indigo-500 dark:text-indigo-400 font-bold">GSTIN: {sale.customerGstin}</div>}
+                        </div>
+                      </td>
+                      <td className="py-3">
+                        <span className="font-semibold block text-slate-700 dark:text-slate-300">{sale.productName}</span>
+                        <span className="text-[10px] text-slate-400 block mt-0.5">{sale.category}</span>
+                      </td>
+                      <td className="py-3 text-center font-bold text-slate-800 dark:text-slate-200">{sale.quantity}</td>
+                      <td className="py-3 text-right font-bold text-slate-900 dark:text-white font-mono">{formatCurrency(sale.totalAmount)}</td>
+                      <td className="py-3 text-right font-mono">
+                        <div className="font-bold text-slate-800 dark:text-white">{formatCurrency(sale.amountPaid || 0)}</div>
+                        <div className="text-[9px] font-bold text-slate-450 uppercase">{sale.paymentMethod || 'Cash'}</div>
+                      </td>
+                      <td className="py-3 text-right font-bold font-mono">
+                        {(sale.dueAmount || 0) > 0 ? (
+                          <span className="text-amber-600 dark:text-amber-400">{formatCurrency(sale.dueAmount)}</span>
+                        ) : (
+                          <span className="text-emerald-600 dark:text-emerald-400">0.00</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
+        </div>
+
+        {/* Signatures/Approval Block for printed documents */}
+        <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-8 text-center text-xs">
+          <div>
+            <div className="h-10 border-b border-slate-250 dark:border-slate-750 mx-auto max-w-[200px]" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mt-2">Prepared By</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300 block mt-0.5">Admin Staff</span>
+          </div>
+          <div>
+            <div className="h-10 border-b border-slate-250 dark:border-slate-750 mx-auto max-w-[200px]" />
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mt-2">Authorized Signatory</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300 block mt-0.5">Suresh Kumar (CEO), S.K. Power Tech</span>
+          </div>
         </div>
 
         {/* Verification footer */}
@@ -233,6 +288,13 @@ const ReportsView = () => {
         </div>
 
       </div>
+
+      </div>
+
+      {/* Invoice Modal Overlay for printing/viewing individual bills */}
+      {activeInvoice && (
+        <InvoiceModal sale={activeInvoice} onClose={() => setActiveInvoice(null)} />
+      )}
 
     </div>
   );

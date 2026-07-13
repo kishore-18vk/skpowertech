@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock, ShieldAlert, Sun, Droplet, Zap, ArrowRight } from 'lucide-react';
+import logo from '../assets/logo.jpeg';
 
 const LoginView = ({ onLogin }) => {
   const [username, setUsername] = useState('');
@@ -43,11 +44,9 @@ const LoginView = ({ onLogin }) => {
         
         {/* Logo / Header Area */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 via-sky-500 to-amber-500 text-white font-bold text-2xl shadow-xl shadow-indigo-950/50 mb-3 animate-bounce duration-[3s]">
-            SK
-          </div>
+          <img src={logo} alt="SK Powertech Logo" className="inline-flex w-16 h-16 object-contain bg-white p-1 rounded-2xl border border-slate-800 shadow-xl mb-3 animate-pulse duration-[3s]" />
           <h2 className="font-display font-black text-2xl tracking-tight text-white">
-            SK POWERTECH
+            S.K. POWER TECH
           </h2>
           <p className="text-xs text-slate-400 font-medium tracking-wide mt-1 uppercase">
             Business Portal & Ledger

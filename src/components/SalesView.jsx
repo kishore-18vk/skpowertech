@@ -1,22 +1,26 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { formatCurrency } from '../utils/helpers';
-import { ShoppingCart, User, Phone, MapPin, Calendar, CheckCircle2, XCircle, Calculator, Tag } from 'lucide-react';
+import { ShoppingCart, User, Phone, MapPin, Calendar, CheckCircle2, XCircle, Calculator, Tag, Mail, CreditCard } from 'lucide-react';
 
 const SalesView = () => {
-  const { products, dealers, addSale, setActiveTab } = useContext(AppContext);
+  const { products, addSale, setActiveTab } = useContext(AppContext);
 
   // Form states
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
     customerAddress: '',
+    customerEmail: '',
+    customerGstin: '',
     productId: '',
     quantity: '1',
-    sellingPrice: '',
+    totalAmount: '',
+    amountPaid: '',
+    dueAmount: '0',
     date: '2026-07-11',
     paymentStatus: 'Paid',
-    dealerId: '',
+    paymentMethod: 'Cash',
     installationDate: '2026-07-12'
   });
 
@@ -24,29 +28,42 @@ const SalesView = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Update price when product changes
+  // Update selected product reference when productId changes
   useEffect(() => {
     if (formData.productId) {
       const prod = products.find(p => p.id === formData.productId);
       if (prod) {
         setSelectedProduct(prod);
-        setFormData(prev => ({
-          ...prev,
-          sellingPrice: prod.sellingPrice.toString()
-        }));
       }
     } else {
       setSelectedProduct(null);
-      setFormData(prev => ({
-        ...prev,
-        sellingPrice: ''
-      }));
     }
   }, [formData.productId, products]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    setFormData(prev => {
+      const updated = { ...prev, [name]: value };
+      
+      if (name === 'totalAmount') {
+        const total = parseFloat(value) || 0;
+        const paid = prev.paymentStatus === 'Paid' ? total : (parseFloat(prev.amountPaid) || 0);
+        updated.amountPaid = paid.toString();
+        updated.dueAmount = (total - paid).toString();
+      } else if (name === 'amountPaid') {
+        const total = parseFloat(prev.totalAmount) || 0;
+        const paid = parseFloat(value) || 0;
+        updated.dueAmount = (total - paid).toString();
+      } else if (name === 'paymentStatus') {
+        const total = parseFloat(prev.totalAmount) || 0;
+        const paid = value === 'Paid' ? total : 0;
+        updated.amountPaid = paid.toString();
+        updated.dueAmount = (total - paid).toString();
+      }
+      
+      return updated;
+    });
   };
 
   const handleSubmit = (e) => {
@@ -54,7 +71,7 @@ const SalesView = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!formData.customerName || !formData.customerPhone || !formData.customerAddress || !formData.productId || !formData.quantity || !formData.sellingPrice || !formData.date) {
+    if (!formData.customerName || !formData.customerPhone || !formData.customerAddress || !formData.productId || !formData.quantity || !formData.totalAmount || !formData.date) {
       setErrorMessage("Please complete all required fields.");
       return;
     }
@@ -78,24 +95,31 @@ const SalesView = () => {
     const result = addSale(formData);
 
     if (result.success) {
-      setSuccessMessage("Sale successfully recorded! Stock has been deducted.");
+      setSuccessMessage("Sale successfully recorded! Redirecting to Sales Report...");
       
-      // Reset form (keep date and payment status)
+      // Reset form
       setFormData({
         customerName: '',
         customerPhone: '',
         customerAddress: '',
+        customerEmail: '',
+        customerGstin: '',
         productId: '',
         quantity: '1',
-        sellingPrice: '',
+        totalAmount: '',
+        amountPaid: '',
+        dueAmount: '0',
         date: '2026-07-11',
         paymentStatus: 'Paid',
-        dealerId: '',
+        paymentMethod: 'Cash',
         installationDate: '2026-07-12'
       });
       
-      // Clear success message after 4s
-      setTimeout(() => setSuccessMessage(''), 4000);
+      // Redirect after 1s
+      setTimeout(() => {
+        setSuccessMessage('');
+        setActiveTab('reports');
+      }, 1000);
     } else {
       setErrorMessage(result.error || "Failed to record sale.");
     }
@@ -103,17 +127,11 @@ const SalesView = () => {
 
   // Calculations
   const qty = parseInt(formData.quantity) || 0;
-  const unitPrice = parseFloat(formData.sellingPrice) || 0;
-  const subtotal = qty * unitPrice;
-  // Let's assume the pricing includes 18% GST (9% CGST + 9% SGST)
-  // GST value = subtotal - (subtotal / 1.18)
-  const gstValue = subtotal - (subtotal / 1.18);
-  const baseValue = subtotal - gstValue;
-  const cgst = gstValue / 2;
-  const sgst = gstValue / 2;
-
+  const subtotal = parseFloat(formData.totalAmount) || 0;
+  const unitPrice = qty > 0 ? subtotal / qty : 0;
+  
   const estimatedProfit = selectedProduct 
-    ? (unitPrice - selectedProduct.purchasePrice) * qty 
+    ? subtotal - (selectedProduct.purchasePrice * qty) 
     : 0;
 
   return (
@@ -186,6 +204,39 @@ const SalesView = () => {
                   />
                 </div>
 
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 flex items-center space-x-1">
+                    <Mail size={10} />
+                    <span>Email Address</span>
+                  </label>
+                  <input 
+                    type="email" 
+                    name="customerEmail"
+                    value={formData.customerEmail}
+                    onChange={handleInputChange}
+                    placeholder="e.g. customer@example.com"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 flex items-center space-x-1">
+                    <Tag size={10} />
+                    <span>GSTIN (Optional)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="customerGstin"
+                    value={formData.customerGstin}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, customerGstin: e.target.value.toUpperCase() }));
+                    }}
+                    placeholder="e.g. 29AAAAA1111A1Z1"
+                    maxLength="15"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
+                  />
+                </div>
+
                 <div className="sm:col-span-2 space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 flex items-center space-x-1">
                     <MapPin size={10} />
@@ -243,34 +294,18 @@ const SalesView = () => {
                   />
                 </div>
 
-                {/* Selling Price */}
+                {/* Total Sale Amount */}
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Invoice Rate per Unit (₹) *</label>
+                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Total Sale Amount (₹) *</label>
                   <input 
                     type="number" 
-                    name="sellingPrice"
-                    value={formData.sellingPrice}
+                    name="totalAmount"
+                    value={formData.totalAmount}
                     onChange={handleInputChange}
                     placeholder="0"
                     className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
                   />
-                </div>
-
-                {/* Dealer Select */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Sales Agent / Employee</label>
-                  <select 
-                    name="dealerId"
-                    value={formData.dealerId}
-                    onChange={handleInputChange}
-                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
-                  >
-                    <option value="">-- Direct Sale (No Agent) --</option>
-                    {dealers.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} ({d.commissionRate}%)</option>
-                    ))}
-                  </select>
                 </div>
 
                 {/* Sale Date */}
@@ -300,6 +335,56 @@ const SalesView = () => {
                   >
                     <option value="Paid">Paid</option>
                     <option value="Pending">Pending</option>
+                  </select>
+                </div>
+
+                {/* Amount Paid */}
+                {formData.paymentStatus === 'Pending' && (
+                  <div className="space-y-1 animate-fade-in">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Amount Paid (₹) *</label>
+                    <input 
+                      type="number" 
+                      name="amountPaid"
+                      value={formData.amountPaid}
+                      onChange={handleInputChange}
+                      placeholder="0"
+                      className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
+                      required
+                    />
+                  </div>
+                )}
+
+                {/* Remaining Due Amount */}
+                {formData.paymentStatus === 'Pending' && (
+                  <div className="space-y-1 animate-fade-in">
+                    <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Remaining Due Amount (₹)</label>
+                    <input 
+                      type="number" 
+                      name="dueAmount"
+                      value={formData.dueAmount}
+                      readOnly
+                      disabled
+                      className="w-full px-3.5 py-2.5 border border-slate-100 dark:border-slate-800/80 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-500 dark:text-slate-400 font-bold outline-none select-none"
+                    />
+                  </div>
+                )}
+
+                {/* Payment Method */}
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500 flex items-center space-x-1">
+                    <CreditCard size={10} className="text-slate-450" />
+                    <span>Payment Method *</span>
+                  </label>
+                  <select 
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleInputChange}
+                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
+                  >
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Card">Card</option>
+                    <option value="Net Banking">Net Banking</option>
                   </select>
                 </div>
 
@@ -382,23 +467,8 @@ const SalesView = () => {
                 <span className="font-semibold">{formatCurrency(unitPrice)}</span>
               </div>
               
-              <div className="border-t border-dashed border-slate-100 dark:border-slate-800 pt-2.5 space-y-2 text-[11px] text-slate-400 font-medium">
-                <div className="flex justify-between">
-                  <span>Base Price (Excl. GST)</span>
-                  <span>{formatCurrency(baseValue)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>CGST (9%)</span>
-                  <span>{formatCurrency(cgst)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>SGST (9%)</span>
-                  <span>{formatCurrency(sgst)}</span>
-                </div>
-              </div>
-
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex justify-between items-end">
-                <span className="font-bold text-slate-700 dark:text-slate-300">Grand Total (Incl. GST)</span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">Grand Total Amount</span>
                 <span className="text-lg font-black text-slate-900 dark:text-white leading-none">
                   {formatCurrency(subtotal)}
                 </span>

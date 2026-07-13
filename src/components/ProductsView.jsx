@@ -7,7 +7,7 @@ const ProductsView = () => {
   const { products, addProduct, updateProduct, deleteProduct, clearProducts } = useContext(AppContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -127,27 +127,27 @@ const ProductsView = () => {
 
   // Filter products
   const filteredProducts = products.filter(p => {
-    const matchesSearch = 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.model.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="space-y-6 animate-fade-in">
-      
+
       {/* Search & Filter Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
-        
+
         {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             placeholder="Search by name, brand, model..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -164,8 +164,8 @@ const ProductsView = () => {
                 onClick={() => setSelectedCategory(cat)}
                 className={`
                   px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150
-                  ${selectedCategory === cat 
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950' 
+                  ${selectedCategory === cat
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950'
                     : 'bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}
                 `}
               >
@@ -176,7 +176,7 @@ const ProductsView = () => {
 
           <div className="flex items-center space-x-2 shrink-0">
             {products.length > 0 && (
-              <button 
+              <button
                 onClick={handleClearAll}
                 className="flex items-center space-x-1.5 px-3 py-2 border border-rose-250 dark:border-rose-900/30 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-650 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer"
               >
@@ -184,7 +184,7 @@ const ProductsView = () => {
                 <span>Clear All</span>
               </button>
             )}
-            <button 
+            <button
               onClick={handleOpenAddModal}
               className="flex items-center space-x-1.5 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-100 dark:shadow-none transition-all duration-150 cursor-pointer"
             >
@@ -215,7 +215,7 @@ const ProductsView = () => {
               {filteredProducts.map((p) => {
                 const margin = p.sellingPrice - p.purchasePrice;
                 const marginPercentage = p.sellingPrice ? Math.round((margin / p.sellingPrice) * 100) : 0;
-                
+
                 // Stock badge styling
                 let stockTextClass = 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20';
                 let stockLabel = 'In Stock';
@@ -238,8 +238,8 @@ const ProductsView = () => {
                 }
 
                 return (
-                  <tr 
-                    key={p.id} 
+                  <tr
+                    key={p.id}
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors text-xs text-slate-700 dark:text-slate-300"
                   >
                     {/* Name & Model & Category */}
@@ -301,19 +301,19 @@ const ProductsView = () => {
                     {/* Actions */}
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <button 
+                        <button
                           onClick={() => handleIncrementStock(p.id)}
                           className="flex items-center space-x-1 px-2.5 py-1.5 rounded-xl border border-indigo-100 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/30 dark:border-indigo-900/20 text-indigo-650 dark:text-indigo-400 font-bold text-[9px] transition-all duration-150 active:scale-95 cursor-pointer"
                         >
                           <span>+1 Stock</span>
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleOpenEditModal(p)}
                           className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
                         >
                           <Edit2 size={12} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(p.id, p.name)}
                           className="p-1.5 rounded-lg border border-rose-100 dark:border-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-500 dark:text-rose-400 transition-colors"
                         >
@@ -333,13 +333,13 @@ const ProductsView = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
-            
+
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
               <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">
                 {editingProduct ? 'Edit Catalog Product' : 'Register New Product'}
               </h3>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"
               >
@@ -353,11 +353,11 @@ const ProductsView = () => {
                 {/* Name */}
                 <div className="col-span-2 space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Product Name *</label>
-                  <input 
-                    type="text" 
-                    name="name" 
-                    value={formData.name} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                     placeholder="e.g. Aura Water Purifier RO"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -367,11 +367,11 @@ const ProductsView = () => {
                 {/* Brand */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Brand Name *</label>
-                  <input 
-                    type="text" 
-                    name="brand" 
-                    value={formData.brand} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleInputChange}
                     placeholder="e.g. Aura, V-Guard"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -381,11 +381,11 @@ const ProductsView = () => {
                 {/* Model */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Model Number *</label>
-                  <input 
-                    type="text" 
-                    name="model" 
-                    value={formData.model} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="model"
+                    value={formData.model}
+                    onChange={handleInputChange}
                     placeholder="e.g. VG-SOL-200"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -395,9 +395,9 @@ const ProductsView = () => {
                 {/* Category */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Category *</label>
-                  <select 
-                    name="category" 
-                    value={formData.category} 
+                  <select
+                    name="category"
+                    value={formData.category}
                     onChange={handleInputChange}
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                   >
@@ -410,11 +410,11 @@ const ProductsView = () => {
                 {/* Available Stock */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Available Stock *</label>
-                  <input 
-                    type="number" 
-                    name="stock" 
-                    value={formData.stock} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="number"
+                    name="stock"
+                    value={formData.stock}
+                    onChange={handleInputChange}
                     placeholder="e.g. 10"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -424,11 +424,11 @@ const ProductsView = () => {
                 {/* Purchase Price */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Purchase Price (₹) *</label>
-                  <input 
-                    type="number" 
-                    name="purchasePrice" 
-                    value={formData.purchasePrice} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="number"
+                    name="purchasePrice"
+                    value={formData.purchasePrice}
+                    onChange={handleInputChange}
                     placeholder="e.g. 12000"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -438,11 +438,11 @@ const ProductsView = () => {
                 {/* Selling Price */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Selling Price (₹) *</label>
-                  <input 
-                    type="number" 
-                    name="sellingPrice" 
-                    value={formData.sellingPrice} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="number"
+                    name="sellingPrice"
+                    value={formData.sellingPrice}
+                    onChange={handleInputChange}
                     placeholder="e.g. 15000"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                     required
@@ -452,11 +452,11 @@ const ProductsView = () => {
                 {/* Low Stock Threshold */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Low Stock Alert Level</label>
-                  <input 
-                    type="number" 
-                    name="lowStockThreshold" 
-                    value={formData.lowStockThreshold} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="number"
+                    name="lowStockThreshold"
+                    value={formData.lowStockThreshold}
+                    onChange={handleInputChange}
                     placeholder="3"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                   />
@@ -465,11 +465,11 @@ const ProductsView = () => {
                 {/* Product Image URL */}
                 <div className="space-y-1 col-span-2">
                   <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-slate-500">Image URL</label>
-                  <input 
-                    type="text" 
-                    name="image" 
-                    value={formData.image} 
-                    onChange={handleInputChange} 
+                  <input
+                    type="text"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
                     placeholder="https://example.com/image.jpg (Optional)"
                     className="w-full px-3.5 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
                   />

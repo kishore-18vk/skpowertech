@@ -3,6 +3,7 @@ import { AppContext } from '../context/AppContext';
 import NotificationPanel from './NotificationPanel';
 import { Bell, Menu, Calendar, LogOut } from 'lucide-react';
 import { formatDate } from '../utils/helpers';
+import logo from '../assets/logo.jpeg';
 
 const Header = ({ toggleSidebar }) => {
   const { alerts, logout } = useContext(AppContext);
@@ -20,12 +21,10 @@ const Header = ({ toggleSidebar }) => {
         </button>
         <div className="flex items-center space-x-2.5">
           {/* Company Logo */}
-          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 via-sky-500 to-amber-500 text-white font-black text-xs shadow-sm">
-            SK
-          </div>
+          <img src={logo} alt="SK Powertech Logo" className="w-8 h-8 object-contain bg-white p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm" />
           {/* Company Name */}
           <span className="font-display font-extrabold text-slate-900 dark:text-white text-sm sm:text-base tracking-tight">
-            SK Powertech
+            S.K. Power Tech
           </span>
         </div>
       </div>

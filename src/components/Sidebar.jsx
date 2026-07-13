@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
+import logo from '../assets/logo.jpeg';
 import {
   LayoutDashboard,
   Package,
@@ -46,11 +47,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         {/* Brand/Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center space-x-2.5">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 via-sky-500 to-amber-500 text-white font-bold text-lg shadow-md shadow-slate-300 dark:shadow-none">
-              SK
-            </div>
+            <img src={logo} alt="SK Powertech Logo" className="w-9 h-9 object-contain bg-white p-0.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm" />
             <div>
-              <span className="font-display font-bold text-base leading-none text-slate-800 dark:text-white block">SK Powertech</span>
+              <span className="font-display font-bold text-base leading-none text-slate-800 dark:text-white block">S.K. Power Tech</span>
               <span className="text-[10px] text-slate-400 font-medium tracking-widest uppercase">ERP Manager</span>
             </div>
           </div>
