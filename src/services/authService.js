@@ -34,28 +34,37 @@ export const authService = {
   },
 
   // 2. Log in with email and password
-  async login(email, password) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+  async login(usernameOrEmail, password) {
+    // Automatically turn a plain username into the valid email format Supabase requires
+    let email = usernameOrEmail;
+    if (!usernameOrEmail.includes('@')) {
+      email = `${usernameOrEmail}@skpowertech.com`;
+    }
 
-      if (!error && data && data.user) {
-        return {
-          success: true,
-          user: {
-            id: data.user.id,
-            email: data.user.email
-          }
-        };
-      }
-    } catch (e) {
-      console.warn("Supabase login failed, trying local credentials:", e);
+    // Try authenticating directly via Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    // If successful, return the valid database session user profile
+    if (!error && data?.user) {
+      return {
+        success: true,
+        user: {
+          id: data.user.id,
+          email: data.user.email
+        }
+      };
+    }
+
+    // Log the actual backend authentication rejection message to assist debugging
+    if (error) {
+      console.error("Supabase Auth rejected application request:", error.message);
     }
 
     // Local Fallback credentials for development / offline use
-    const localUsername = email.split('@')[0];
+    const localUsername = usernameOrEmail.split('@')[0];
     if ((localUsername === 'admin' || email === 'admin@skpowertech.com') && password === 'admin123') {
       const mockUser = {
         id: 'local-admin-id',
@@ -68,7 +77,10 @@ export const authService = {
       };
     }
 
-    return { success: false, error: "Invalid credentials" };
+    return { 
+      success: false, 
+      error: error ? error.message : "Invalid credentials" 
+    };
   },
 
   // 3. Log out of the session
@@ -82,4 +94,3 @@ export const authService = {
     return true;
   }
 };
-
