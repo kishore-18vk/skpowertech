@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { formatCurrency, exportToCSV, getMonthYearString } from '../utils/helpers';
-import { Calendar, Download, Printer, FileText, ArrowRight, ShieldCheck, Sun, Droplet, Zap, Battery } from 'lucide-react';
+import { Calendar, Download, Printer, FileText, ArrowRight, ShieldCheck, Sun, Droplet, Zap, Battery, Flame, Wrench } from 'lucide-react';
 import InvoiceModal from './InvoiceModal';
 import logo from '../assets/logo.jpeg';
 
@@ -18,7 +18,9 @@ const ReportsView = () => {
     'Solar Water Heater': { qty: 0, revenue: 0, profit: 0, color: 'text-emerald-500', bgColor: 'bg-emerald-50 dark:bg-emerald-950/20', icon: Sun },
     'Water Purifier': { qty: 0, revenue: 0, profit: 0, color: 'text-blue-500', bgColor: 'bg-blue-50 dark:bg-blue-950/20', icon: Droplet },
     'UPS Inverter': { qty: 0, revenue: 0, profit: 0, color: 'text-orange-500', bgColor: 'bg-orange-50 dark:bg-orange-950/20', icon: Zap },
-    'Batteries': { qty: 0, revenue: 0, profit: 0, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-950/20', icon: Battery }
+    'Batteries': { qty: 0, revenue: 0, profit: 0, color: 'text-amber-500', bgColor: 'bg-amber-50 dark:bg-amber-950/20', icon: Battery },
+    'Electric Heater': { qty: 0, revenue: 0, profit: 0, color: 'text-rose-500', bgColor: 'bg-rose-50 dark:bg-rose-950/20', icon: Flame },
+    'Spare Parts': { qty: 0, revenue: 0, profit: 0, color: 'text-slate-500', bgColor: 'bg-slate-50 dark:bg-slate-950/20', icon: Wrench }
   };
 
   monthlySales.forEach(s => {

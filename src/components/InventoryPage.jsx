@@ -6,7 +6,9 @@ const categories = [
   'Solar Water Heater',
   'Water Purifier',
   'UPS Inverter',
-  'Batteries'
+  'Batteries',
+  'Electric Heater',
+  'Spare Parts'
 ];
 
 // Color mapping for cards and accents based on category
@@ -14,22 +16,32 @@ const categoryColors = {
   'Solar Water Heater': {
     bg: 'bg-emerald-500/10 border-emerald-500/20 dark:bg-emerald-950/20',
     text: 'text-emerald-600 dark:text-emerald-400',
-    badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-305'
+    badge: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
   },
   'Water Purifier': {
     bg: 'bg-blue-500/10 border-blue-500/20 dark:bg-blue-950/20',
     text: 'text-blue-600 dark:text-blue-400',
-    badge: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-305'
+    badge: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
   },
   'UPS Inverter': {
     bg: 'bg-orange-500/10 border-orange-500/20 dark:bg-orange-950/20',
     text: 'text-orange-600 dark:text-orange-400',
-    badge: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-305'
+    badge: 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300'
   },
   'Batteries': {
     bg: 'bg-amber-500/10 border-amber-500/20 dark:bg-amber-955/20',
     text: 'text-amber-600 dark:text-amber-400',
-    badge: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-305'
+    badge: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+  },
+  'Electric Heater': {
+    bg: 'bg-rose-500/10 border-rose-500/20 dark:bg-rose-955/20',
+    text: 'text-rose-600 dark:text-rose-400',
+    badge: 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+  },
+  'Spare Parts': {
+    bg: 'bg-slate-500/10 border-slate-500/20 dark:bg-slate-955/20',
+    text: 'text-slate-600 dark:text-slate-400',
+    badge: 'bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-300'
   }
 };
 
@@ -127,13 +139,13 @@ const InventoryPage = () => {
 
   // Group mappings
   const getProductGroup = (category) => {
-    if (category === 'Solar Water Heater') {
+    if (category === 'Solar Water Heater' || category === 'Electric Heater') {
       return 'solar';
     }
     if (category === 'UPS Inverter' || category === 'Batteries') {
       return 'ups';
     }
-    if (category === 'Water Purifier') {
+    if (category === 'Water Purifier' || category === 'Spare Parts') {
       return 'water';
     }
     return 'solar';
@@ -185,8 +197,8 @@ const InventoryPage = () => {
                 <Sun className="w-5.5 h-5.5" />
               </div>
               <div>
-                <h4 className="font-display font-black text-sm text-slate-800 dark:text-white">Solar Water Heaters</h4>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 uppercase tracking-wider">SK Solar range</p>
+                <h4 className="font-display font-black text-sm text-slate-800 dark:text-white">Solar & Heaters</h4>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 uppercase tracking-wider">SK Solar & Heating</p>
               </div>
             </div>
             {activeSubTab === 'solar' && (
@@ -243,8 +255,8 @@ const InventoryPage = () => {
                 <Droplet className="w-5.5 h-5.5" />
               </div>
               <div>
-                <h4 className="font-display font-black text-sm text-slate-800 dark:text-white">Water Purifiers</h4>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 uppercase tracking-wider">Pure RO systems</p>
+                <h4 className="font-display font-black text-sm text-slate-800 dark:text-white">Purifiers & Spares</h4>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold mt-0.5 uppercase tracking-wider">Pure RO & Spare Parts</p>
               </div>
             </div>
             {activeSubTab === 'water' && (

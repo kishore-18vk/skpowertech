@@ -18,7 +18,9 @@ import {
   Boxes,
   Percent,
   Calendar,
-  Users
+  Users,
+  Flame,
+  Wrench
 } from 'lucide-react';
 
 const DashboardView = () => {
@@ -68,7 +70,9 @@ const DashboardView = () => {
     'Solar Water Heater': { revenue: 0, count: 0, color: '#10b981', hoverColor: '#059669', icon: Sun },
     'Water Purifier': { revenue: 0, count: 0, color: '#3b82f6', hoverColor: '#1d4ed8', icon: Droplet },
     'UPS Inverter': { revenue: 0, count: 0, color: '#f97316', hoverColor: '#c2410c', icon: Zap },
-    'Batteries': { revenue: 0, count: 0, color: '#eab308', hoverColor: '#a16207', icon: Battery }
+    'Batteries': { revenue: 0, count: 0, color: '#eab308', hoverColor: '#a16207', icon: Battery },
+    'Electric Heater': { revenue: 0, count: 0, color: '#f43f5e', hoverColor: '#e11d48', icon: Flame },
+    'Spare Parts': { revenue: 0, count: 0, color: '#64748b', hoverColor: '#475569', icon: Wrench }
   };
   sales.forEach(s => {
     if (categorySales[s.category]) {
@@ -649,6 +653,40 @@ const DashboardView = () => {
                 <div 
                   className="bg-amber-500 h-full rounded-full transition-all duration-500" 
                   style={{ width: `${Math.min((getCategoryStockSum('Batteries') / 40) * 100, 100)}%` }} 
+                />
+              </div>
+            </div>
+
+            {/* Electric Heater Card */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-end text-xs">
+                <span className="font-bold text-rose-600 dark:text-rose-400 flex items-center space-x-1">
+                  <Flame size={12} />
+                  <span>Electric Heater</span>
+                </span>
+                <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Electric Heater')} Available</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-rose-500 h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min((getCategoryStockSum('Electric Heater') / 15) * 100, 100)}%` }} 
+                />
+              </div>
+            </div>
+
+            {/* Spare Parts Card */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-end text-xs">
+                <span className="font-bold text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+                  <Wrench size={12} />
+                  <span>Spare Parts</span>
+                </span>
+                <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Spare Parts')} Available</span>
+              </div>
+              <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-slate-500 h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min((getCategoryStockSum('Spare Parts') / 50) * 100, 100)}%` }} 
                 />
               </div>
             </div>

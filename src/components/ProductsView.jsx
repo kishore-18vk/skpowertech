@@ -25,7 +25,15 @@ const ProductsView = () => {
     image: ''
   });
 
-  const categories = ['All', 'Solar Water Heater', 'Water Purifier', 'UPS'];
+  const categories = [
+    'All',
+    'Solar Water Heater',
+    'Water Purifier',
+    'UPS Inverter',
+    'Batteries',
+    'Electric Heater',
+    'Spare Parts'
+  ];
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
@@ -233,8 +241,16 @@ const ProductsView = () => {
                   catBadgeClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
                 } else if (p.category === 'Water Purifier') {
                   catBadgeClass = 'bg-sky-500/10 text-sky-600 dark:text-sky-400';
-                } else {
+                } else if (p.category === 'UPS Inverter') {
                   catBadgeClass = 'bg-orange-500/10 text-orange-600 dark:text-orange-400';
+                } else if (p.category === 'Batteries') {
+                  catBadgeClass = 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+                } else if (p.category === 'Electric Heater') {
+                  catBadgeClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+                } else if (p.category === 'Spare Parts') {
+                  catBadgeClass = 'bg-slate-500/10 text-slate-600 dark:text-slate-400';
+                } else {
+                  catBadgeClass = 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400';
                 }
 
                 return (
@@ -403,7 +419,10 @@ const ProductsView = () => {
                   >
                     <option value="Solar Water Heater">Solar Water Heater</option>
                     <option value="Water Purifier">Water Purifier</option>
-                    <option value="UPS">UPS</option>
+                    <option value="UPS Inverter">UPS Inverter</option>
+                    <option value="Batteries">Batteries</option>
+                    <option value="Electric Heater">Electric Heater</option>
+                    <option value="Spare Parts">Spare Parts</option>
                   </select>
                 </div>
 

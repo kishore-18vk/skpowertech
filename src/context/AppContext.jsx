@@ -7,6 +7,12 @@ export const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   // Load initial state from local storage or fall back to empty arrays / initial data
   const [products, setProducts] = useState(() => {
+    const hasMigrated = localStorage.getItem('sk_products_migrated_v2');
+    if (!hasMigrated) {
+      localStorage.setItem('sk_products_migrated_v2', 'true');
+      return initialProducts;
+    }
+
     const saved = localStorage.getItem('sk_products');
     if (saved) {
       try {
