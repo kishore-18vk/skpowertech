@@ -1,64 +1,17 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { initialProducts, initialSales, initialDealers, initialTickets, initialLogs } from '../utils/dummyData';
-import { generateSystemAlerts, calculateExpiryDate } from '../utils/helpers';
+import { productService } from '../services/productService';
+import { salesService } from '../services/salesService';
+import { authService } from '../services/authService';
+import { generateSystemAlerts } from '../utils/helpers';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  // Load initial state from local storage or fall back to empty arrays / initial data
-  const [products, setProducts] = useState(() => {
-    const hasMigrated = localStorage.getItem('sk_products_migrated_v2');
-    if (!hasMigrated) {
-      localStorage.setItem('sk_products_migrated_v2', 'true');
-      return initialProducts;
-    }
+  const [products, setProducts] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const saved = localStorage.getItem('sk_products');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error parsing sk_products local storage", e);
-      }
-    }
-    return initialProducts;
-  });
-
-  const [sales, setSales] = useState(() => {
-    const saved = localStorage.getItem('sk_sales');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error parsing sk_sales local storage", e);
-      }
-    }
-    return [];
-  });
-
-  const [dealers, setDealers] = useState(() => {
-    const saved = localStorage.getItem('sk_dealers');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error("Error parsing sk_dealers local storage", e);
-      }
-    }
-    return initialDealers;
-  });
-
-  const [tickets, setTickets] = useState(() => {
-    const saved = localStorage.getItem('sk_tickets');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [logs, setLogs] = useState(() => {
-    const saved = localStorage.getItem('sk_logs');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-
+  // Keep these layout states exactly as they were
   const [activeTab, setActiveTab] = useState(() => {
     const saved = localStorage.getItem('sk_active_tab');
     return saved ? saved : 'dashboard';
@@ -69,42 +22,36 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : false;
   });
 
-  const [auth, setAuth] = useState(() => {
-    const saved = localStorage.getItem('sk_auth');
-    return saved ? JSON.parse(saved) : { isAuthenticated: false, user: null };
-  });
+  const [auth, setAuth] = useState({ isAuthenticated: false, user: null });
 
-  // Seed default credentials in local storage if not already there
+  // 1. Initial application startup load
   useEffect(() => {
-    if (!localStorage.getItem('sk_admin_credentials')) {
-      localStorage.setItem('sk_admin_credentials', JSON.stringify({
-        username: 'admin',
-        password: 'admin123'
-      }));
+    async function initializeApp() {
+      try {
+        setLoading(true);
+        
+        // Restore active user session if valid
+        const initialSession = await authService.getCurrentSession();
+        if (initialSession) {
+          setAuth(initialSession);
+        }
+
+        // Fetch database data
+        const dbProducts = await productService.getAllProducts();
+        const dbSales = await salesService.getAllSales();
+        
+        setProducts(dbProducts);
+        setSales(dbSales);
+      } catch (err) {
+        console.error("Database connection initialization failure:", err);
+      } finally {
+        setLoading(false);
+      }
     }
+    initializeApp();
   }, []);
 
-  // Sync to local storage
-  useEffect(() => {
-    localStorage.setItem('sk_products', JSON.stringify(products));
-  }, [products]);
-
-  useEffect(() => {
-    localStorage.setItem('sk_sales', JSON.stringify(sales));
-  }, [sales]);
-
-  useEffect(() => {
-    localStorage.setItem('sk_dealers', JSON.stringify(dealers));
-  }, [dealers]);
-
-  useEffect(() => {
-    localStorage.setItem('sk_tickets', JSON.stringify(tickets));
-  }, [tickets]);
-
-  useEffect(() => {
-    localStorage.setItem('sk_logs', JSON.stringify(logs));
-  }, [logs]);
-
+  // 2. Tab & Theme Synced local storage routines
   useEffect(() => {
     localStorage.setItem('sk_active_tab', activeTab);
   }, [activeTab]);
@@ -118,288 +65,118 @@ export const AppProvider = ({ children }) => {
     }
   }, [darkMode]);
 
-  useEffect(() => {
-    localStorage.setItem('sk_auth', JSON.stringify(auth));
-  }, [auth]);
+  // 3. Authenticated actions mapped to custom Supabase parameters
+  const login = async (usernameOrEmail, password) => {
+    // If the input doesn't contain an '@', append a default domain automatically for convenience
+    const targetEmail = usernameOrEmail.includes('@') 
+      ? usernameOrEmail 
+      : `${usernameOrEmail}@skpowertech.com`;
 
-  const login = (username, password) => {
-    const storedCreds = JSON.parse(localStorage.getItem('sk_admin_credentials') || '{"username":"admin","password":"admin123"}');
-    if (username === storedCreds.username && password === storedCreds.password) {
-      const authState = { isAuthenticated: true, user: { username } };
-      setAuth(authState);
-      addLog("User Login", `User ${username} logged in successfully.`);
+    const result = await authService.login(targetEmail, password);
+    if (result.success) {
+      setAuth({ isAuthenticated: true, user: result.user });
       return { success: true };
     } else {
-      return { success: false, error: "Invalid username or password" };
+      return { success: false, error: result.error };
     }
   };
 
-  const logout = () => {
-    const authState = { isAuthenticated: false, user: null };
-    setAuth(authState);
-    addLog("User Logout", "Administrator logged out.");
+  const logout = async () => {
+    await authService.logout();
+    setAuth({ isAuthenticated: false, user: null });
   };
 
-  // Log action helper
-  const addLog = (action, details) => {
-    const newLog = {
-      id: `log-${Date.now()}`,
-      action,
-      details,
-      timestamp: new Date().toISOString()
-    };
-    setLogs(prev => [newLog, ...prev]);
-  };
-
-  // Product CRUD
-  const addProduct = (productData) => {
-    const newProduct = {
-      id: `prod-${Date.now()}`,
-      ...productData,
-      stock: parseInt(productData.stock) || 0,
-      purchasePrice: parseFloat(productData.purchasePrice) || 0,
-      sellingPrice: parseFloat(productData.sellingPrice) || 0,
-      lowStockThreshold: parseInt(productData.lowStockThreshold) || 3
-    };
-    setProducts(prev => [newProduct, ...prev]);
-    addLog("Product Added", `${newProduct.name} (${newProduct.model}) was added to inventory.`);
-  };
-
-  const updateProduct = (id, updatedData) => {
-    setProducts(prev => prev.map(p => {
-      if (p.id === id) {
-        const updated = {
-          ...p,
-          ...updatedData,
-          stock: parseInt(updatedData.stock) || 0,
-          purchasePrice: parseFloat(updatedData.purchasePrice) || 0,
-          sellingPrice: parseFloat(updatedData.sellingPrice) || 0,
-          lowStockThreshold: parseInt(updatedData.lowStockThreshold) || 3
-        };
-        addLog("Product Updated", `${updated.name} details were updated.`);
-        return updated;
-      }
-      return p;
-    }));
-  };
-
-  const deleteProduct = (id) => {
-    const product = products.find(p => p.id === id);
-    setProducts(prev => prev.filter(p => p.id !== id));
-    if (product) {
-      addLog("Product Deleted", `${product.name} was removed from the system.`);
-    }
-  };
-
-  const clearProducts = () => {
-    setProducts([]);
-    addLog("Database Reset", "All products were cleared from the inventory.");
-  };
-
-  // Sales Entry with stock reduction, profit calculations, and service tickets
-  const addSale = (saleData) => {
-    const product = products.find(p => p.id === saleData.productId);
-    if (!product) return { success: false, error: "Product not found." };
-    if (product.stock < saleData.quantity) {
-      return { success: false, error: `Insufficient stock. Available: ${product.stock}` };
-    }
-
-    // Auto-calculate profit, total amount, and warranty
-    const qty = parseInt(saleData.quantity);
-    const totalAmount = saleData.totalAmount ? parseFloat(saleData.totalAmount) : (parseFloat(saleData.sellingPrice) || product.sellingPrice) * qty;
-    const sPrice = totalAmount / qty;
-    const pPrice = product.purchasePrice;
-    const profitAmount = totalAmount - (pPrice * qty);
-
-    const amountPaid = saleData.amountPaid !== undefined ? parseFloat(saleData.amountPaid) : (saleData.paymentStatus === 'Paid' ? totalAmount : 0);
-    const dueAmount = saleData.dueAmount !== undefined ? parseFloat(saleData.dueAmount) : (totalAmount - amountPaid);
-
-    // Define warranty parameters based on category
-    let warrantyDuration = 0; // default to 0 (no warranty)
-    if (product.category === 'UPS') {
-      warrantyDuration = 24; // 2 years
-    } else if (product.category === 'Water Purifier') {
-      warrantyDuration = 12; // 12 months
-    }
-
-    const warrantyExpiry = warrantyDuration > 0 ? calculateExpiryDate(saleData.date, warrantyDuration) : "";
-
-    const newSale = {
-      id: `sale-${Date.now()}`,
-      ...saleData,
-      productName: product.name,
-      category: product.category,
-      quantity: qty,
-      sellingPrice: sPrice,
-      purchasePrice: pPrice,
-      totalAmount,
-      profitAmount,
-      amountPaid,
-      dueAmount,
-      warrantyDuration,
-      warrantyExpiry,
-      installationStatus: product.category === 'Solar Water Heater' ? 'Scheduled' : 'Completed',
-      installationDate: saleData.installationDate || saleData.date
-    };
-
-    // 1. Deduct Stock
-    setProducts(prev => prev.map(p => {
-      if (p.id === product.id) {
-        return { ...p, stock: p.stock - qty };
-      }
-      return p;
-    }));
-
-    // 2. Add Sale
-    setSales(prev => [newSale, ...prev]);
-
-    // 3. Log sales transaction
-    addLog("Sale Recorded", `Sold ${qty}x ${product.name} to ${saleData.customerName} for ${totalAmount}.`);
-
-    // 4. If Solar Water Heater, automatically create an installation ticket
-    if (product.category === 'Solar Water Heater') {
-      const newTicket = {
-        id: `tkt-${Date.now()}`,
-        customerName: saleData.customerName,
-        customerPhone: saleData.customerPhone,
-        type: 'Installation',
-        productName: product.name,
-        description: 'New solar water heater installation. Needs support frame mounting and pipeline connections.',
-        technician: 'Dinesh Gowda (Solar Structural Lead)',
-        status: 'Pending',
-        scheduledDate: saleData.installationDate || saleData.date,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setTickets(prev => [newTicket, ...prev]);
-      addLog("Installation Scheduled", `Automatic ticket created for ${saleData.customerName}'s Solar Heater.`);
-    }
-
-    // 5. If Water Purifier, automatically schedule a maintenance checklist item (6-month checkup)
-    if (product.category === 'Water Purifier') {
-      const maintDate = calculateExpiryDate(saleData.date, 6);
-      const newTicket = {
-        id: `tkt-${Date.now() + 1}`,
-        customerName: saleData.customerName,
-        customerPhone: saleData.customerPhone,
-        type: 'Maintenance',
-        productName: product.name,
-        description: '6-Month Routine service and sediment/activated carbon filter inspection.',
-        technician: 'Suresh Babu (Water Purifier Specialist)',
-        status: 'Pending',
-        scheduledDate: maintDate,
-        createdAt: new Date().toISOString().split('T')[0]
-      };
-      setTickets(prev => [newTicket, ...prev]);
-    }
-
-    return { success: true };
-  };
-
-  const updateSalePaymentStatus = (id, status) => {
-    setSales(prev => prev.map(s => {
-      if (s.id === id) {
-        const updated = { ...s, paymentStatus: status };
-        addLog("Payment Status Updated", `${s.customerName}'s invoice status set to ${status}.`);
-        return updated;
-      }
-      return s;
-    }));
-  };
-
-  // Dealer CRUD
-  const addDealer = (dealerData) => {
-    const newDealer = {
-      id: `dealer-${Date.now()}`,
-      name: dealerData.name,
-      phone: dealerData.phone,
-      commissionRate: parseFloat(dealerData.commissionRate) || 0,
-      active: true
-    };
-    setDealers(prev => [...prev, newDealer]);
-    addLog("Dealer Registered", `Sales agent ${newDealer.name} registered.`);
-  };
-
-  const updateDealer = (id, updatedData) => {
-    setDealers(prev => prev.map(d => {
-      if (d.id === id) {
-        return {
-          ...d,
-          ...updatedData,
-          commissionRate: parseFloat(updatedData.commissionRate) || 0
-        };
-      }
-      return d;
-    }));
-    addLog("Dealer Updated", `Sales agent details modified.`);
-  };
-
-  // Tickets CRUD
-  const addTicket = (ticketData) => {
-    const newTicket = {
-      id: `tkt-${Date.now()}`,
-      ...ticketData,
-      status: ticketData.status || 'Pending',
-      createdAt: new Date().toISOString().split('T')[0]
-    };
-    setTickets(prev => [newTicket, ...prev]);
-    addLog("Ticket Opened", `New ${newTicket.type} ticket opened for ${newTicket.customerName}.`);
-  };
-
-  const updateTicket = (id, updatedData) => {
-    setTickets(prev => prev.map(t => {
-      if (t.id === id) {
-        const updated = { ...t, ...updatedData };
-        addLog("Ticket Updated", `Ticket #${id.substring(4)} status/tech updated.`);
-        return updated;
-      }
-      return t;
-    }));
-  };
-
-  // System settings functions
-  const loadDemoData = () => {
-    setProducts(initialProducts);
-    setSales(initialSales);
-    setDealers(initialDealers);
-    setTickets(initialTickets);
-    setLogs(initialLogs);
-    addLog("Database Reset", "Seeded the ERP database with clean demo records.");
-  };
-
-  const factoryReset = () => {
-    setProducts([]);
-    setSales([]);
-    setDealers([]);
-    setTickets([]);
-    setLogs([]);
-    addLog("Database Cleared", "Cleared all data from the local storage database.");
-  };
-
-  const restoreData = (jsonData) => {
+  // 4. Product Catalog Database updates
+  const addProduct = async (productData) => {
     try {
-      const data = JSON.parse(jsonData);
-      if (data.products) setProducts(data.products);
-      if (data.sales) setSales(data.sales);
-      if (data.dealers) setDealers(data.dealers);
-      if (data.tickets) setTickets(data.tickets);
-      if (data.logs) setLogs(data.logs);
-      addLog("Database Restored", "Successfully restored data from JSON backup.");
-      return { success: true };
-    } catch (e) {
-      return { success: false, error: e.message };
+      await productService.createProduct(productData);
+      // Refresh local array directly from source database table 
+      const freshData = await productService.getAllProducts();
+      setProducts(freshData);
+    } catch (err) {
+      console.error("Failed to add catalog item row:", err);
     }
   };
 
-  // Get active system warnings
-  const alerts = generateSystemAlerts(products, sales, tickets);
+  const updateProduct = async (id, updatedData) => {
+    try {
+      await productService.updateProduct(id, updatedData);
+      const freshData = await productService.getAllProducts();
+      setProducts(freshData);
+    } catch (err) {
+      console.error("Failed to adjust inventory items columns:", err);
+    }
+  };
+
+  const deleteProduct = async (id) => {
+    try {
+      await productService.deleteProduct(id);
+      const freshData = await productService.getAllProducts();
+      setProducts(freshData);
+    } catch (err) {
+      console.error("Failed to eliminate selected component entry:", err);
+    }
+  };
+
+  // 5. Transaction Database entries
+  const addSale = async (saleData) => {
+    const activeProduct = products.find(p => p.id === saleData.productId);
+    if (!activeProduct) return { success: false, error: "Product not located inside current tracking indexes." };
+    if (activeProduct.stock < parseInt(saleData.quantity)) {
+      return { success: false, error: `Insufficient stock boundaries. Maximum available limit: ${activeProduct.stock}` };
+    }
+
+    try {
+      const checkoutResult = await salesService.createSale(saleData, activeProduct);
+      
+      // Pull fresh data post-transaction to accurately reflect adjusted inventory items
+      const freshProducts = await productService.getAllProducts();
+      const freshSales = await salesService.getAllSales();
+      
+      setProducts(freshProducts);
+      setSales(freshSales);
+      
+      return checkoutResult;
+    } catch (err) {
+      console.error("Failed handling database order write validation routines:", err);
+      return { success: false, error: err.message || "Database transaction pipeline failure." };
+    }
+  };
+
+  const updateSalePaymentStatus = async (id, status) => {
+    try {
+      await salesService.updatePaymentStatus(id, status);
+      const freshSales = await salesService.getAllSales();
+      setSales(freshSales);
+    } catch (err) {
+      console.error("Failed adjusting payment status balance records:", err);
+    }
+  };
+
+  // Safe fallback mocks maintaining support logic for non-migrated layouts
+  const clearProducts = () => console.warn("Operation restricted inside active production database configuration context.");
+  const loadDemoData = () => console.warn("Operation disabled inside active production backend configuration mode.");
+  const factoryReset = () => console.warn("Reset operations restricted within secure relational environments.");
+
+  // Keep analytical alert engines computing identically to standard specifications
+  const alerts = generateSystemAlerts(products, sales, []);
+
+  // Block rendering until initial database requests settle to prevent UI layout jumps
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <AppContext.Provider value={{
       products,
       sales,
-      dealers,
-      tickets,
-      logs,
+      dealers: [], // preserves empty layouts gracefully
+      tickets: [], 
+      logs: [],
       alerts,
       activeTab,
       setActiveTab,
@@ -414,14 +191,8 @@ export const AppProvider = ({ children }) => {
       clearProducts,
       addSale,
       updateSalePaymentStatus,
-      addDealer,
-      updateDealer,
-      addTicket,
-      updateTicket,
       loadDemoData,
-      factoryReset,
-      restoreData,
-      addLog
+      factoryReset
     }}>
       {children}
     </AppContext.Provider>

@@ -1,16 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { formatCurrency, formatDate } from '../utils/helpers';
-import { 
-  TrendingUp, 
-  Package, 
-  Layers, 
-  ShoppingCart, 
-  DollarSign, 
+import {
+  TrendingUp,
+  Package,
+  Layers,
+  ShoppingCart,
+  DollarSign,
   AlertTriangle,
   ArrowUpRight,
-  Zap, 
-  Droplet, 
+  Zap,
+  Droplet,
   Sun,
   Battery,
   Plus,
@@ -31,7 +31,7 @@ const DashboardView = () => {
   // 1. KPI Calculations
   const totalProducts = products.length;
   const totalStock = products.reduce((acc, curr) => acc + curr.stock, 0);
-  
+
   // Today's Date is static target '2026-07-11' for consistency
   const todayDateStr = '2026-07-11';
   const todaySales = sales.filter(s => s.date === todayDateStr);
@@ -82,7 +82,7 @@ const DashboardView = () => {
   });
 
   const totalCatRevenue = Object.values(categorySales).reduce((acc, curr) => acc + curr.revenue, 0) || 1;
-  
+
   // Donut chart stroke configurations
   let cumulativePercent = 0;
   const donutSlices = Object.entries(categorySales).map(([name, cat]) => {
@@ -149,16 +149,16 @@ const DashboardView = () => {
     profit: d.profit
   }));
 
-  const revenuePathD = points.length > 0 
-    ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') 
+  const revenuePathD = points.length > 0
+    ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
     : '';
 
   const revenueAreaD = points.length > 0
     ? `${revenuePathD} L ${points[points.length - 1].x} ${chartHeight - paddingBottom} L ${points[0].x} ${chartHeight - paddingBottom} Z`
     : '';
 
-  const profitPathD = points.length > 0 
-    ? `M ${points[0].x} ${points[0].profitY} ` + points.slice(1).map(p => `L ${p.x} ${p.profitY}`).join(' ') 
+  const profitPathD = points.length > 0
+    ? `M ${points[0].x} ${points[0].profitY} ` + points.slice(1).map(p => `L ${p.x} ${p.profitY}`).join(' ')
     : '';
 
   const profitAreaD = points.length > 0
@@ -172,12 +172,12 @@ const DashboardView = () => {
 
   return (
     <div className="space-y-6 pb-12 animate-fade-in text-left">
-      
+
       {/* Welcome Banner */}
       <div className="relative overflow-hidden bg-slate-900 text-white rounded-3xl p-6 md:p-8 border border-slate-800 shadow-xl">
         <div className="absolute top-0 right-0 -translate-y-12 translate-x-12 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 translate-y-12 -translate-x-12 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Executive Dashboard</span>
@@ -198,7 +198,7 @@ const DashboardView = () => {
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        
+
         {/* KPI: Total Products */}
         <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between">
           <div className="flex items-center justify-between">
@@ -280,18 +280,16 @@ const DashboardView = () => {
         </div>
 
         {/* KPI: Low Stock Alerts */}
-        <div className={`border rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-205 flex flex-col justify-between ${
-          lowStockCount > 0 
-            ? 'bg-rose-50/45 dark:bg-rose-950/10 border-rose-205 dark:border-rose-900/40' 
+        <div className={`border rounded-2xl p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-205 flex flex-col justify-between ${lowStockCount > 0
+            ? 'bg-rose-50/45 dark:bg-rose-950/10 border-rose-205 dark:border-rose-900/40'
             : 'bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800/80'
-        }`}>
+          }`}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-550">Low Stock Alert</span>
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-              lowStockCount > 0 
-                ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-455 animate-pulse' 
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${lowStockCount > 0
+                ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-455 animate-pulse'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-550'
-            }`}>
+              }`}>
               <AlertTriangle size={14} />
             </div>
           </div>
@@ -332,12 +330,12 @@ const DashboardView = () => {
           <svg className="w-full h-full" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity="0.25"/>
-                <stop offset="95%" stopColor="#6366f1" stopOpacity="0.00"/>
+                <stop offset="5%" stopColor="#6366f1" stopOpacity="0.25" />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity="0.00" />
               </linearGradient>
               <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity="0.25"/>
-                <stop offset="95%" stopColor="#10b981" stopOpacity="0.00"/>
+                <stop offset="5%" stopColor="#10b981" stopOpacity="0.25" />
+                <stop offset="95%" stopColor="#10b981" stopOpacity="0.00" />
               </linearGradient>
             </defs>
 
@@ -347,20 +345,20 @@ const DashboardView = () => {
               const gridVal = Math.round(maxRevenue * (1 - r));
               return (
                 <g key={i} className="opacity-40">
-                  <line 
-                    x1={paddingLeft} 
-                    y1={y} 
-                    x2={chartWidth - paddingRight} 
-                    y2={y} 
-                    stroke="#e2e8f0" 
-                    strokeDasharray="4 4" 
+                  <line
+                    x1={paddingLeft}
+                    y1={y}
+                    x2={chartWidth - paddingRight}
+                    y2={y}
+                    stroke="#e2e8f0"
+                    strokeDasharray="4 4"
                     className="dark:stroke-slate-800"
                   />
-                  <text 
-                    x={paddingLeft - 10} 
-                    y={y + 3} 
-                    textAnchor="end" 
-                    fontSize="9" 
+                  <text
+                    x={paddingLeft - 10}
+                    y={y + 3}
+                    textAnchor="end"
+                    fontSize="9"
                     className="fill-slate-400 font-bold"
                   >
                     ₹{(gridVal >= 100000) ? (gridVal / 100000).toFixed(1) + 'L' : (gridVal / 1000).toFixed(0) + 'k'}
@@ -381,40 +379,40 @@ const DashboardView = () => {
             {points.map((p, i) => (
               <g key={`data-${i}`}>
                 {/* Revenue point */}
-                <circle 
-                  cx={p.x} 
-                  cy={p.y} 
-                  r={hoveredChartIndex === i ? 6 : 4} 
-                  fill="#6366f1" 
-                  stroke="white" 
-                  strokeWidth="2" 
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={hoveredChartIndex === i ? 6 : 4}
+                  fill="#6366f1"
+                  stroke="white"
+                  strokeWidth="2"
                   className="transition-all duration-150"
                 />
-                
+
                 {/* Profit point */}
-                <circle 
-                  cx={p.x} 
-                  cy={p.profitY} 
-                  r={hoveredChartIndex === i ? 6 : 4} 
-                  fill="#10b981" 
-                  stroke="white" 
-                  strokeWidth="2" 
+                <circle
+                  cx={p.x}
+                  cy={p.profitY}
+                  r={hoveredChartIndex === i ? 6 : 4}
+                  fill="#10b981"
+                  stroke="white"
+                  strokeWidth="2"
                   className="transition-all duration-150"
                 />
 
                 {/* X Axis label */}
-                <text 
-                  x={p.x} 
-                  y={chartHeight - 10} 
-                  textAnchor="middle" 
-                  fontSize="10" 
+                <text
+                  x={p.x}
+                  y={chartHeight - 10}
+                  textAnchor="middle"
+                  fontSize="10"
                   className={`font-semibold transition-colors duration-150 ${hoveredChartIndex === i ? 'fill-indigo-500 font-extrabold' : 'fill-slate-400'}`}
                 >
                   {p.label}
                 </text>
 
                 {/* Transparent hover detector column */}
-                <rect 
+                <rect
                   x={p.x - 25}
                   y={paddingTop}
                   width="50"
@@ -447,7 +445,7 @@ const DashboardView = () => {
 
       {/* Main Grid content: Category sales & Best Sellers & Inventory status */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Category Sales Distribution Donut */}
         <div className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col justify-between">
           <div>
@@ -482,7 +480,7 @@ const DashboardView = () => {
                   />
                 ))}
               </svg>
-              
+
               {/* Inner Center Label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Total Value</span>
@@ -545,8 +543,8 @@ const DashboardView = () => {
                   'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300 border-orange-200 dark:border-orange-900' // Bronze
                 ];
                 return (
-                  <div 
-                    key={prod.name} 
+                  <div
+                    key={prod.name}
                     className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-850 rounded-2xl hover:-translate-y-0.5 transition-transform"
                   >
                     <div className="flex items-center space-x-3 min-w-0">
@@ -599,9 +597,9 @@ const DashboardView = () => {
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                 {/* relative progress, assume max capacity target 50 for visuals */}
-                <div 
-                  className="bg-emerald-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('Solar Water Heater') / 50) * 100, 100)}%` }} 
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('Solar Water Heater') / 50) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -616,9 +614,9 @@ const DashboardView = () => {
                 <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Water Purifier')} Available</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-blue-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('Water Purifier') / 50) * 100, 100)}%` }} 
+                <div
+                  className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('Water Purifier') / 50) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -633,9 +631,9 @@ const DashboardView = () => {
                 <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('UPS Inverter')} Available</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-orange-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('UPS Inverter') / 30) * 100, 100)}%` }} 
+                <div
+                  className="bg-orange-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('UPS Inverter') / 30) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -650,9 +648,9 @@ const DashboardView = () => {
                 <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Batteries')} Available</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-amber-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('Batteries') / 40) * 100, 100)}%` }} 
+                <div
+                  className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('Batteries') / 40) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -667,9 +665,9 @@ const DashboardView = () => {
                 <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Electric Heater')} Available</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-rose-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('Electric Heater') / 15) * 100, 100)}%` }} 
+                <div
+                  className="bg-rose-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('Electric Heater') / 15) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -684,9 +682,9 @@ const DashboardView = () => {
                 <span className="font-black text-slate-905 dark:text-white">{getCategoryStockSum('Spare Parts')} Available</span>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div 
-                  className="bg-slate-500 h-full rounded-full transition-all duration-500" 
-                  style={{ width: `${Math.min((getCategoryStockSum('Spare Parts') / 50) * 100, 100)}%` }} 
+                <div
+                  className="bg-slate-500 h-full rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min((getCategoryStockSum('Spare Parts') / 50) * 100, 100)}%` }}
                 />
               </div>
             </div>
@@ -702,7 +700,7 @@ const DashboardView = () => {
 
       {/* Recent Sales Table & Quick Actions Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Recent Sales Table (Spans 2 columns) */}
         <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-3xl p-5 md:p-6 shadow-sm">
           <div className="flex items-center justify-between mb-5">
@@ -770,8 +768,8 @@ const DashboardView = () => {
 
           <div className="flex-1 my-6 flex flex-col justify-center space-y-3">
             {/* Add Product Action */}
-            <button 
-              onClick={() => setActiveTab('products')} 
+            <button
+              onClick={() => setActiveTab('products')}
               className="flex items-center justify-between p-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-705 text-white rounded-2xl shadow-sm hover:shadow-indigo-100 hover:shadow-md dark:shadow-none hover:-translate-y-0.5 transition-all text-left group"
             >
               <div className="flex items-center space-x-3">
@@ -787,8 +785,8 @@ const DashboardView = () => {
             </button>
 
             {/* Add Sale Action */}
-            <button 
-              onClick={() => setActiveTab('sales')} 
+            <button
+              onClick={() => setActiveTab('sales')}
               className="flex items-center justify-between p-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-705 text-white rounded-2xl shadow-sm hover:shadow-emerald-100 hover:shadow-md dark:shadow-none hover:-translate-y-0.5 transition-all text-left group"
             >
               <div className="flex items-center space-x-3">
@@ -804,8 +802,8 @@ const DashboardView = () => {
             </button>
 
             {/* Update Stock Action */}
-            <button 
-              onClick={() => setActiveTab('products')} 
+            <button
+              onClick={() => setActiveTab('products')}
               className="flex items-center justify-between p-3.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-705 text-white rounded-2xl shadow-sm hover:shadow-orange-100 hover:shadow-md dark:shadow-none hover:-translate-y-0.5 transition-all text-left group"
             >
               <div className="flex items-center space-x-3">
@@ -821,8 +819,8 @@ const DashboardView = () => {
             </button>
 
             {/* View Reports Action */}
-            <button 
-              onClick={() => setActiveTab('reports')} 
+            <button
+              onClick={() => setActiveTab('reports')}
               className="flex items-center justify-between p-3.5 bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-705 text-white rounded-2xl shadow-sm hover:shadow-sky-100 hover:shadow-md dark:shadow-none hover:-translate-y-0.5 transition-all text-left group"
             >
               <div className="flex items-center space-x-3">
