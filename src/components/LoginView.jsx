@@ -19,11 +19,16 @@ const LoginView = ({ onLogin }) => {
     setError('');
 
     // Simulate small latency for premium login feel
-    setTimeout(() => {
-      const res = onLogin(username, password);
-      setIsLoading(false);
-      if (!res.success) {
-        setError(res.error || 'Invalid credentials');
+    setTimeout(async () => {
+      try {
+        const res = await onLogin(username, password);
+        setIsLoading(false);
+        if (!res.success) {
+          setError(res.error || 'Invalid credentials');
+        }
+      } catch (err) {
+        setIsLoading(false);
+        setError('An unexpected error occurred during login.');
       }
     }, 600);
   };
