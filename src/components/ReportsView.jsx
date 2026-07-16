@@ -1,14 +1,20 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import { formatCurrency, exportToCSV, getMonthYearString } from '../utils/helpers';
-import { Calendar, Download, Printer, FileText, ArrowRight, ShieldCheck, Sun, Droplet, Zap, Battery, Flame, Wrench } from 'lucide-react';
+import { Calendar, Download, Printer, FileText, ArrowRight, ShieldCheck, Sun, Droplet, Zap, Battery, Flame, Wrench, Trash2 } from 'lucide-react';
 import InvoiceModal from './InvoiceModal';
 import logo from '../assets/logo.jpeg';
 
 const ReportsView = () => {
-  const { sales } = useContext(AppContext);
+  const { sales, deleteSale } = useContext(AppContext);
   const [selectedMonth, setSelectedMonth] = useState('2026-07'); // Default to target month
   const [activeInvoice, setActiveInvoice] = useState(null);
+
+  const handleDelete = async (id, productId, quantity) => {
+    if (window.confirm("Are you sure you want to delete this sale record? This will restore the product stock and remove the transaction permanently.")) {
+      await deleteSale(id, productId, quantity);
+    }
+  };
 
   // Filter sales by selected month
   const monthlySales = sales.filter(s => s.date && s.date.startsWith(selectedMonth));
@@ -221,6 +227,7 @@ const ReportsView = () => {
                     <th className="py-2 text-right">Total Invoice</th>
                     <th className="py-2 text-right">Amount Paid</th>
                     <th className="py-2 text-right">Remaining Due</th>
+                    <th className="py-2 text-right no-print">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-850">
@@ -257,6 +264,15 @@ const ReportsView = () => {
                         ) : (
                           <span className="text-emerald-600 dark:text-emerald-400">0.00</span>
                         )}
+                      </td>
+                      <td className="py-3 text-right no-print">
+                        <button
+                          onClick={() => handleDelete(sale.id, sale.productId, sale.quantity)}
+                          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors duration-150"
+                          title="Delete Transaction"
+                        >
+                          <Trash2 size={14} />
+                        </button>
                       </td>
                     </tr>
                   ))}

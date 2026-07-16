@@ -187,5 +187,68 @@ export const salesService = {
       return salesList[index];
     }
     return null;
+  },
+
+  // 4. Delete a sale record and restore product stock
+  async deleteSale(id, productId, quantity) {
+    try {
+      // First delete sale_items to prevent foreign key constraint violations
+      await supabase
+        .from('sale_items')
+        .delete()
+        .eq('sale_id', id);
+
+      // Delete the sale itself
+      const { error } = await supabase
+        .from('sales')
+        .delete()
+        .eq('id', id);
+
+      if (!error && productId && quantity) {
+        // Try to restore product stock database-side
+        const { data: prodData } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', productId)
+          .single();
+        
+        if (prodData) {
+          const updatedStock = (parseInt(prodData.stock) || 0) + parseInt(quantity);
+          await supabase
+            .from('products')
+            .update({ stock: updatedStock })
+            .eq('id', productId);
+        }
+      }
+      if (!error) return true;
+    } catch (e) {
+      console.warn("Supabase deleteSale failed, deleting locally:", e);
+    }
+
+    // Local Fallback delete
+    const savedSales = localStorage.getItem('sk_sales');
+    if (savedSales) {
+      try {
+        let salesList = JSON.parse(savedSales);
+        const filteredList = salesList.filter(s => s.id !== id);
+        localStorage.setItem('sk_sales', JSON.stringify(filteredList));
+      } catch (e) {}
+    }
+
+    // Also restore local product stock
+    if (productId && quantity) {
+      const savedProducts = localStorage.getItem('sk_products');
+      if (savedProducts) {
+        try {
+          let productsList = JSON.parse(savedProducts);
+          const pIndex = productsList.findIndex(p => p.id === productId);
+          if (pIndex !== -1) {
+            productsList[pIndex].stock = (parseInt(productsList[pIndex].stock) || 0) + parseInt(quantity);
+            localStorage.setItem('sk_products', JSON.stringify(productsList));
+          }
+        } catch (e) {}
+      }
+    }
+    return true;
   }
 };

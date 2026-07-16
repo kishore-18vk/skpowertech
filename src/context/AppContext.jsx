@@ -153,6 +153,18 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const deleteSale = async (id, productId, quantity) => {
+    try {
+      await salesService.deleteSale(id, productId, quantity);
+      const freshProducts = await productService.getAllProducts();
+      const freshSales = await salesService.getAllSales();
+      setProducts(freshProducts);
+      setSales(freshSales);
+    } catch (err) {
+      console.error("Failed to delete sale record:", err);
+    }
+  };
+
   // Safe fallback mocks maintaining support logic for non-migrated layouts
   const clearProducts = () => console.warn("Operation restricted inside active production database configuration context.");
   const loadDemoData = () => console.warn("Operation disabled inside active production backend configuration mode.");
@@ -191,6 +203,7 @@ export const AppProvider = ({ children }) => {
       clearProducts,
       addSale,
       updateSalePaymentStatus,
+      deleteSale,
       loadDemoData,
       factoryReset
     }}>
