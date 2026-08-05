@@ -19,13 +19,17 @@ export const initialProducts = [
   { id: 'p15', name: 'Auro 10 L Aqua 2090', brand: 'Auro', model: '10 L Aqua 2090', category: 'Water Purifier', stock: 2, purchasePrice: 4500, sellingPrice: 7200, lowStockThreshold: 3 },
 
   // UPS Inverters
-  { id: 'p16', name: 'V-Guard Prime 1250 Mini', brand: 'V-Guard', model: 'Prime 1250 Mini', category: 'UPS Inverter', stock: 4, purchasePrice: 4000, sellingPrice: 5500, lowStockThreshold: 3 },
-  { id: 'p17', name: 'V-Guard 1250', brand: 'V-Guard', model: '1250', category: 'UPS Inverter', stock: 5, purchasePrice: 4200, sellingPrice: 5800, lowStockThreshold: 3 },
-  { id: 'p18', name: 'V-Guard 900', brand: 'V-Guard', model: '900', category: 'UPS Inverter', stock: 1, purchasePrice: 3500, sellingPrice: 4800, lowStockThreshold: 3 },
-  { id: 'p19', name: 'V-Guard 1000 Mini', brand: 'V-Guard', model: '1000 Mini', category: 'UPS Inverter', stock: 1, purchasePrice: 3800, sellingPrice: 5200, lowStockThreshold: 3 },
-  { id: 'p20', name: 'V-Guard 1000 Mini (Additional)', brand: 'V-Guard', model: '1000 Mini Add', category: 'UPS Inverter', stock: 1, purchasePrice: 3800, sellingPrice: 5200, lowStockThreshold: 3 },
-  { id: 'p21', name: 'V-Guard 1000', brand: 'V-Guard', model: '1000', category: 'UPS Inverter', stock: 1, purchasePrice: 3900, sellingPrice: 5350, lowStockThreshold: 3 },
-  { id: 'p22', name: 'V-Guard 1050', brand: 'V-Guard', model: '1050', category: 'UPS Inverter', stock: 1, purchasePrice: 4000, sellingPrice: 5500, lowStockThreshold: 3 },
+  { id: 'p16', name: 'V-Guard JAADOO 1150', brand: 'V-Guard', model: 'JAADOO 1150', category: 'UPS Inverter', stock: 1, purchasePrice: 4000, sellingPrice: 5500, lowStockThreshold: 3 },
+  { id: 'p17', name: 'V-Guard Prime 1050', brand: 'V-Guard', model: 'Prime 1050', category: 'UPS Inverter', stock: 1, purchasePrice: 4000, sellingPrice: 5500, lowStockThreshold: 3 },
+  { id: 'p18', name: 'V-Guard Prime 800', brand: 'V-Guard', model: 'Prime 800', category: 'UPS Inverter', stock: 1, purchasePrice: 3500, sellingPrice: 4800, lowStockThreshold: 3 },
+  { id: 'p19', name: 'V-Guard Prime 1250', brand: 'V-Guard', model: 'Prime 1250', category: 'UPS Inverter', stock: 5, purchasePrice: 4200, sellingPrice: 5800, lowStockThreshold: 3 },
+  { id: 'p20', name: 'V-Guard Prime 1250 mili', brand: 'V-Guard', model: 'Prime 1250 mili', category: 'UPS Inverter', stock: 7, purchasePrice: 4000, sellingPrice: 5500, lowStockThreshold: 3 },
+  { id: 'p21', name: 'V-Guard Prime 1000 mili', brand: 'V-Guard', model: 'Prime 1000 mili', category: 'UPS Inverter', stock: 5, purchasePrice: 3800, sellingPrice: 5200, lowStockThreshold: 3 },
+  { id: 'p22', name: 'V-Guard Prime 2250', brand: 'V-Guard', model: 'Prime 2250', category: 'UPS Inverter', stock: 3, purchasePrice: 7500, sellingPrice: 9800, lowStockThreshold: 3 },
+  { id: 'p29_1', name: 'V-Guard Prime 1550 mili', brand: 'V-Guard', model: 'Prime 1550 mili', category: 'UPS Inverter', stock: 4, purchasePrice: 5000, sellingPrice: 6800, lowStockThreshold: 3 },
+  { id: 'p29_2', name: 'V-Guard MPPT 1750', brand: 'V-Guard', model: 'MPPT 1750', category: 'UPS Inverter', stock: 1, purchasePrice: 6000, sellingPrice: 8200, lowStockThreshold: 3 },
+  { id: 'p29_3', name: 'Okaya UPS 1400', brand: 'Okaya', model: 'UPS 1400', category: 'UPS Inverter', stock: 1, purchasePrice: 4500, sellingPrice: 6200, lowStockThreshold: 3 },
+  { id: 'p29_4', name: 'Amaze 1075', brand: 'Amaze', model: '1075', category: 'UPS Inverter', stock: 1, purchasePrice: 4200, sellingPrice: 5800, lowStockThreshold: 3 },
 
   // Batteries
   { id: 'p23', name: 'Okaya Battery', brand: 'Okaya', model: 'Standard', category: 'Batteries', stock: 3, purchasePrice: 7500, sellingPrice: 10000, lowStockThreshold: 3 },

@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
-import { Plus, Minus, Edit2, PlusCircle, Search, Folder, Package, X, RotateCcw, Sun, Zap, Droplet } from 'lucide-react';
+import { Plus, Minus, Edit2, Trash2, PlusCircle, Search, Folder, Package, X, RotateCcw, Sun, Zap, Droplet } from 'lucide-react';
 
 const categories = [
   'Solar Water Heater',
@@ -54,7 +54,7 @@ const getCategoryColor = (cat) => {
 };
 
 const InventoryPage = () => {
-  const { products, addProduct, updateProduct, loadDemoData } = useContext(AppContext);
+  const { products, addProduct, updateProduct, deleteProduct, loadDemoData } = useContext(AppContext);
   const [activeSubTab, setActiveSubTab] = useState('solar');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -80,6 +80,12 @@ const InventoryPage = () => {
     const prod = products.find(p => p.id === id);
     if (prod && prod.stock > 0) {
       updateProduct(id, { stock: prod.stock - 1 });
+    }
+  };
+
+  const handleDeleteProduct = (id, name) => {
+    if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
+      deleteProduct(id);
     }
   };
 
@@ -387,9 +393,19 @@ const InventoryPage = () => {
                               {/* Edit Button */}
                               <button
                                 onClick={() => startEditing(product)}
-                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-slate-205 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+                                title="Edit Product"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
                               >
                                 <Edit2 className="w-3 h-3" />
+                              </button>
+
+                              {/* Delete Button */}
+                              <button
+                                onClick={() => handleDeleteProduct(product.id, product.name)}
+                                title="Delete Product"
+                                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg border border-rose-200 dark:border-rose-950/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 flex items-center justify-center transition-colors active:scale-90 cursor-pointer"
+                              >
+                                <Trash2 className="w-3 h-3" />
                               </button>
                             </div>
                           </td>
