@@ -47,11 +47,13 @@ export const productService = {
 
   // 2. Add a new product to the catalog
   async createProduct(productData) {
+    const generatedId = productData.id || `p_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     let createdProduct = null;
     try {
       const { data, error } = await supabase
         .from('products')
         .insert([{
+          id: generatedId,
           name: productData.name,
           brand: productData.brand,
           model: productData.model,
