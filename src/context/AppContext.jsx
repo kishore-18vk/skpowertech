@@ -191,7 +191,6 @@ export const AppProvider = ({ children }) => {
 
   // Safe fallback mocks maintaining support logic for non-migrated layouts
   const clearProducts = () => console.warn("Operation restricted inside active production database configuration context.");
-  const loadDemoData = () => console.warn("Operation disabled inside active production backend configuration mode.");
   const factoryReset = () => console.warn("Reset operations restricted within secure relational environments.");
 
   // Keep analytical alert engines computing identically to standard specifications
