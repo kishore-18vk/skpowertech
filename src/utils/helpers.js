@@ -36,7 +36,7 @@ export const calculateExpiryDate = (startDateStr, durationMonths) => {
 export const getDaysDifference = (targetDateStr) => {
   if (!targetDateStr) return 0;
   const targetDate = new Date(targetDateStr);
-  const today = new Date("2026-07-11"); // Static system date for consistency
+  const today = new Date(); // Current today's date
   const diffTime = targetDate - today;
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };

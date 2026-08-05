@@ -34,7 +34,7 @@ const Header = ({ toggleSidebar }) => {
         {/* Current Date */}
         <div className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-150 dark:border-slate-800 text-xs font-bold text-slate-600 dark:text-slate-350 shadow-sm">
           <Calendar size={13} className="text-slate-400" />
-          <span>{formatDate("2026-07-11")}</span>
+          <span>{formatDate(new Date())}</span>
         </div>
 
         {/* Notification Bell */}

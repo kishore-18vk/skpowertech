@@ -6,18 +6,36 @@ import InvoiceModal from './InvoiceModal';
 import logo from '../assets/logo.jpeg';
 
 const ReportsView = () => {
-  const { sales, deleteSale } = useContext(AppContext);
-  const [selectedMonth, setSelectedMonth] = useState('2026-07'); // Default to target month
+  const { sales, deleteSale, clearAllSales } = useContext(AppContext);
+  const currentMonthISO = new Date().toISOString().substring(0, 7);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthISO);
   const [activeInvoice, setActiveInvoice] = useState(null);
+  const [notifMsg, setNotifMsg] = useState('');
 
   const handleDelete = async (id, productId, quantity) => {
     if (window.confirm("Are you sure you want to delete this sale record? This will restore the product stock and remove the transaction permanently.")) {
-      await deleteSale(id, productId, quantity);
+      const res = await deleteSale(id, productId, quantity);
+      if (res && res.success !== false) {
+        setNotifMsg("🗑️ Sale record deleted successfully! Product stock restored.");
+        setTimeout(() => setNotifMsg(''), 4000);
+      }
     }
   };
 
-  // Filter sales by selected month
-  const monthlySales = sales.filter(s => s.date && s.date.startsWith(selectedMonth));
+  const handleClearAllSales = async () => {
+    if (window.confirm("⚠️ ARE YOU SURE YOU WANT TO CLEAR ALL SALES? This will permanently delete ALL sales transaction history. This action cannot be undone.")) {
+      const res = await clearAllSales();
+      if (res && res.success !== false) {
+        setNotifMsg("🗑️ All sales data cleared successfully!");
+        setTimeout(() => setNotifMsg(''), 4000);
+      }
+    }
+  };
+
+  // Filter sales by selected month or All Time
+  const monthlySales = selectedMonth === 'ALL' 
+    ? sales 
+    : sales.filter(s => s.date && s.date.startsWith(selectedMonth));
 
   // Category aggregations
   const reportSummary = {
@@ -30,25 +48,117 @@ const ReportsView = () => {
   };
 
   monthlySales.forEach(s => {
-    if (reportSummary[s.category]) {
-      reportSummary[s.category].qty += s.quantity;
-      reportSummary[s.category].revenue += s.totalAmount;
-      reportSummary[s.category].profit += s.profitAmount;
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    const catKey = reportSummary[s.category] ? s.category : 'Spare Parts';
+    reportSummary[catKey].qty += parseInt(s.quantity) || 0;
+    reportSummary[catKey].revenue += parseFloat(s.totalAmount) || 0;
+    reportSummary[catKey].profit += parseFloat(s.profitAmount) || 0;
   });
 
-  const totalRevenue = Object.values(reportSummary).reduce((acc, curr) => acc + curr.revenue, 0);
-  const totalProfit = Object.values(reportSummary).reduce((acc, curr) => acc + curr.profit, 0);
-  const totalSold = Object.values(reportSummary).reduce((acc, curr) => acc + curr.qty, 0);
+  const totalRevenue = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.totalAmount) || 0), 0);
+  const totalProfit = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.profitAmount) || 0), 0);
+  const totalSold = monthlySales.reduce((acc, curr) => acc + (parseInt(curr.quantity) || 0), 0);
 
   const totalOutstanding = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.dueAmount) || 0), 0);
   const totalPaid = monthlySales.reduce((acc, curr) => acc + (parseFloat(curr.amountPaid) || 0), 0);
 
   // Available months list from sales history to filter
-  const uniqueMonths = Array.from(new Set(sales.map(s => s.date.substring(0, 7)))).sort().reverse();
-  if (uniqueMonths.length === 0) {
-    uniqueMonths.push('2026-07');
-  }
+  const uniqueMonths = Array.from(new Set([currentMonthISO, ...sales.map(s => s.date ? s.date.substring(0, 7) : '')])).filter(Boolean).sort().reverse();
 
   // Export report to CSV
   const handleExportCSV = () => {
@@ -75,6 +185,14 @@ const ReportsView = () => {
   return (
     <div className="space-y-6 animate-fade-in text-left">
       <div className="no-print-invoice space-y-6">
+
+      {/* Notification alert banner if set */}
+      {notifMsg && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 rounded-2xl text-xs font-bold flex items-center justify-between shadow-sm animate-fade-in no-print">
+          <span>{notifMsg}</span>
+          <button onClick={() => setNotifMsg('')} className="text-rose-500 hover:text-rose-700 font-bold ml-2">✕</button>
+        </div>
+      )}
       
       {/* Selection & Export toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-slate-900 p-4 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm no-print">
@@ -89,6 +207,7 @@ const ReportsView = () => {
               onChange={(e) => setSelectedMonth(e.target.value)}
               className="mt-0.5 border-none bg-transparent font-display font-extrabold text-sm text-slate-800 dark:text-white outline-none focus:ring-0 cursor-pointer"
             >
+              <option value="ALL" className="dark:bg-slate-900 text-xs">All Time / All Sales</option>
               {uniqueMonths.map(m => (
                 <option key={m} value={m} className="dark:bg-slate-900 text-xs">
                   {getMonthYearString(`${m}-01`)}
@@ -114,6 +233,15 @@ const ReportsView = () => {
           >
             <Printer size={14} />
             <span>Print / PDF</span>
+          </button>
+
+          <button
+            onClick={handleClearAllSales}
+            className="flex items-center space-x-1.5 px-3.5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold shadow-md shadow-rose-100 dark:shadow-none transition-colors duration-150"
+            title="Clear all sales history"
+          >
+            <Trash2 size={14} />
+            <span>Clear All Sales</span>
           </button>
         </div>
 

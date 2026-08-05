@@ -160,8 +160,21 @@ export const AppProvider = ({ children }) => {
       const freshSales = await salesService.getAllSales();
       setProducts(freshProducts);
       setSales(freshSales);
+      return { success: true };
     } catch (err) {
       console.error("Failed to delete sale record:", err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const clearAllSales = async () => {
+    try {
+      await salesService.clearAllSales();
+      setSales([]);
+      return { success: true };
+    } catch (err) {
+      console.error("Failed to clear all sales:", err);
+      return { success: false, error: err.message };
     }
   };
 
@@ -204,6 +217,7 @@ export const AppProvider = ({ children }) => {
       addSale,
       updateSalePaymentStatus,
       deleteSale,
+      clearAllSales,
       loadDemoData,
       factoryReset
     }}>

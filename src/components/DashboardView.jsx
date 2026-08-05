@@ -32,13 +32,14 @@ const DashboardView = () => {
   const totalProducts = products.length;
   const totalStock = products.reduce((acc, curr) => acc + curr.stock, 0);
 
-  // Today's Date is static target '2026-07-11' for consistency
-  const todayDateStr = '2026-07-11';
+  // Today's Date dynamically computed
+  const todayDateStr = new Date().toISOString().split('T')[0];
   const todaySales = sales.filter(s => s.date === todayDateStr);
   const todaySalesQty = todaySales.reduce((acc, curr) => acc + curr.quantity, 0);
 
-  // July 2026 current month statistics
-  const julySales = sales.filter(s => s.date && s.date.startsWith('2026-07'));
+  // Current month statistics
+  const currentMonthStr = new Date().toISOString().substring(0, 7);
+  const julySales = sales.filter(s => s.date && s.date.startsWith(currentMonthStr));
   const julyRevenue = julySales.reduce((acc, curr) => acc + curr.totalAmount, 0);
   const julyProfit = julySales.reduce((acc, curr) => acc + curr.profitAmount, 0);
 

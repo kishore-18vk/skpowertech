@@ -250,5 +250,17 @@ export const salesService = {
       }
     }
     return true;
+  },
+
+  // 5. Clear all sales data
+  async clearAllSales() {
+    try {
+      await supabase.from('sale_items').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      await supabase.from('sales').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    } catch (e) {
+      console.warn("Supabase clearAllSales failed, clearing local storage:", e);
+    }
+    localStorage.setItem('sk_sales', JSON.stringify([]));
+    return true;
   }
 };

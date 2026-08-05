@@ -134,8 +134,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
           {/* System Date stamp */}
           <div className="mt-4 px-4 text-center">
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider block">System Target Date</span>
-            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mt-0.5">July 11, 2026</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium uppercase tracking-wider block">System Date</span>
+            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mt-0.5">{new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
           </div>
         </div>
       </aside>

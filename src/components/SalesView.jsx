@@ -6,6 +6,9 @@ import { ShoppingCart, User, Phone, MapPin, Calendar, CheckCircle2, XCircle, Cal
 const SalesView = () => {
   const { products, addSale, setActiveTab } = useContext(AppContext);
 
+  const getTodayStr = () => new Date().toISOString().split('T')[0];
+  const getTomorrowStr = () => new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
   // Form states
   const [formData, setFormData] = useState({
     customerName: '',
@@ -18,10 +21,10 @@ const SalesView = () => {
     totalAmount: '',
     amountPaid: '',
     dueAmount: '0',
-    date: '2026-07-11',
+    date: getTodayStr(),
     paymentStatus: 'Paid',
     paymentMethod: 'Cash',
-    installationDate: '2026-07-12'
+    installationDate: getTomorrowStr()
   });
 
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -66,36 +69,36 @@ const SalesView = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
     setSuccessMessage('');
 
     if (!formData.customerName || !formData.customerPhone || !formData.customerAddress || !formData.productId || !formData.quantity || !formData.totalAmount || !formData.date) {
-      setErrorMessage("Please complete all required fields.");
+      setErrorMessage("Invoice Not Created: Please complete all required fields (*).");
       return;
     }
 
     if (parseInt(formData.quantity) <= 0) {
-      setErrorMessage("Quantity must be greater than zero.");
+      setErrorMessage("Invoice Not Created: Quantity must be at least 1.");
       return;
     }
 
     if (!selectedProduct) {
-      setErrorMessage("Please select a valid product.");
+      setErrorMessage("Invoice Not Created: Please select a valid product from stock.");
       return;
     }
 
     if (selectedProduct.stock < parseInt(formData.quantity)) {
-      setErrorMessage(`Insufficient stock. Only ${selectedProduct.stock} unit(s) available.`);
+      setErrorMessage(`Invoice Not Created: Insufficient stock available. Only ${selectedProduct.stock} unit(s) left.`);
       return;
     }
 
     // Call state action
-    const result = addSale(formData);
+    const result = await addSale(formData);
 
-    if (result.success) {
-      setSuccessMessage("Sale successfully recorded! Redirecting to Sales Report...");
+    if (result && result.success) {
+      setSuccessMessage("✅ Invoice Created Successfully! Redirecting to Sales Report...");
       
       // Reset form
       setFormData({
@@ -109,19 +112,19 @@ const SalesView = () => {
         totalAmount: '',
         amountPaid: '',
         dueAmount: '0',
-        date: '2026-07-11',
+        date: getTodayStr(),
         paymentStatus: 'Paid',
         paymentMethod: 'Cash',
-        installationDate: '2026-07-12'
+        installationDate: getTomorrowStr()
       });
       
-      // Redirect after 1s
+      // Redirect after 1.2s
       setTimeout(() => {
         setSuccessMessage('');
         setActiveTab('reports');
-      }, 1000);
+      }, 1200);
     } else {
-      setErrorMessage(result.error || "Failed to record sale.");
+      setErrorMessage(`❌ Invoice Not Created: ${result?.error || "Failed to create transaction record."}`);
     }
   };
 
