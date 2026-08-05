@@ -89,8 +89,13 @@ export const AppProvider = ({ children }) => {
   // 4. Product Catalog Database updates
   const addProduct = async (productData) => {
     try {
-      await productService.createProduct(productData);
-      // Refresh local array directly from source database table 
+      const created = await productService.createProduct(productData);
+      if (created) {
+        setProducts(prev => {
+          if (prev.some(p => p.id === created.id)) return prev;
+          return [...prev, created];
+        });
+      }
       const freshData = await productService.getAllProducts();
       setProducts(freshData);
     } catch (err) {
@@ -116,6 +121,12 @@ export const AppProvider = ({ children }) => {
     } catch (err) {
       console.error("Failed to eliminate selected component entry:", err);
     }
+  };
+
+  const loadDemoData = async () => {
+    localStorage.removeItem('sk_products');
+    const freshData = await productService.getAllProducts();
+    setProducts(freshData);
   };
 
   // 5. Transaction Database entries

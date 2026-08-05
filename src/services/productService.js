@@ -4,6 +4,7 @@ import { initialProducts } from '../utils/dummyData';
 export const productService = {
   // 1. Retrieve all products from the catalog
   async getAllProducts() {
+    let dbProducts = [];
     try {
       const { data, error } = await supabase
         .from('products')
@@ -11,7 +12,7 @@ export const productService = {
         .order('name', { ascending: true });
 
       if (!error && data && data.length > 0) {
-        return data.map(p => ({
+        dbProducts = data.map(p => ({
           id: p.id,
           name: p.name,
           brand: p.brand,
@@ -29,16 +30,28 @@ export const productService = {
     }
 
     const saved = localStorage.getItem('sk_products');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {}
+    let localProducts = saved ? JSON.parse(saved) : [];
+
+    if (dbProducts.length > 0) {
+      // Merge local-only products (e.g. ones with 'p_' id or not in dbProducts)
+      const dbIds = new Set(dbProducts.map(p => p.id));
+      const localOnly = localProducts.filter(p => !dbIds.has(p.id));
+      const combined = [...dbProducts, ...localOnly];
+      localStorage.setItem('sk_products', JSON.stringify(combined));
+      return combined;
     }
+
+    if (localProducts.length > 0) {
+      return localProducts;
+    }
+
+    localStorage.setItem('sk_products', JSON.stringify(initialProducts));
     return initialProducts;
   },
 
   // 2. Add a new product to the catalog
   async createProduct(productData) {
+    let createdProduct = null;
     try {
       const { data, error } = await supabase
         .from('products')
@@ -55,24 +68,47 @@ export const productService = {
         }])
         .select();
 
-      if (!error && data && data[0]) return data[0];
+      if (!error && data && data[0]) {
+        const p = data[0];
+        createdProduct = {
+          id: p.id,
+          name: p.name,
+          brand: p.brand,
+          model: p.model,
+          category: p.category,
+          stock: parseInt(p.stock) || 0,
+          purchasePrice: parseFloat(p.purchase_price) || 0,
+          sellingPrice: parseFloat(p.selling_price) || 0,
+          lowStockThreshold: parseInt(p.low_stock_threshold) || 3,
+          image: p.image || ''
+        };
+      } else if (error) {
+        console.warn("Supabase createProduct returned error, using local fallback:", error);
+      }
     } catch (e) {
       console.warn("Supabase createProduct failed, saving locally:", e);
     }
 
+    if (!createdProduct) {
+      createdProduct = {
+        id: 'p_' + Date.now(),
+        ...productData,
+        stock: parseInt(productData.stock) || 0,
+        purchasePrice: parseFloat(productData.purchasePrice) || 0,
+        sellingPrice: parseFloat(productData.sellingPrice) || 0,
+        lowStockThreshold: parseInt(productData.lowStockThreshold) || 3,
+      };
+    }
+
+    // Always save/update in localStorage so local state is consistent
     const saved = localStorage.getItem('sk_products');
     let productsList = saved ? JSON.parse(saved) : [...initialProducts];
-    const newProduct = {
-      id: 'p_' + Date.now(),
-      ...productData,
-      stock: parseInt(productData.stock) || 0,
-      purchasePrice: parseFloat(productData.purchasePrice) || 0,
-      sellingPrice: parseFloat(productData.sellingPrice) || 0,
-      lowStockThreshold: parseInt(productData.lowStockThreshold) || 3,
-    };
-    productsList.push(newProduct);
-    localStorage.setItem('sk_products', JSON.stringify(productsList));
-    return newProduct;
+    if (!productsList.some(p => p.id === createdProduct.id)) {
+      productsList.push(createdProduct);
+      localStorage.setItem('sk_products', JSON.stringify(productsList));
+    }
+
+    return createdProduct;
   },
 
   // 3. Update an existing product
@@ -95,7 +131,17 @@ export const productService = {
         .eq('id', id)
         .select();
 
-      if (!error && data && data[0]) return data[0];
+      if (!error && data && data[0]) {
+        // Sync local storage as well
+        const saved = localStorage.getItem('sk_products');
+        let productsList = saved ? JSON.parse(saved) : [];
+        const index = productsList.findIndex(p => p.id === id);
+        if (index !== -1) {
+          productsList[index] = { ...productsList[index], ...updatedData };
+          localStorage.setItem('sk_products', JSON.stringify(productsList));
+        }
+        return data[0];
+      }
     } catch (e) {
       console.warn("Supabase updateProduct failed, saving locally:", e);
     }
@@ -118,8 +164,6 @@ export const productService = {
         .from('products')
         .delete()
         .eq('id', id);
-
-      if (!error) return true;
     } catch (e) {
       console.warn("Supabase deleteProduct failed, deleting locally:", e);
     }
@@ -131,4 +175,5 @@ export const productService = {
     return true;
   }
 };
+
 

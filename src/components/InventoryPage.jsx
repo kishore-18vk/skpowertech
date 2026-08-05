@@ -102,6 +102,10 @@ const InventoryPage = () => {
       lowStockThreshold: 3
     });
 
+    // Switch tab to the category group of the newly created product & reset search filter
+    setActiveSubTab(getProductGroup(newProductCategory));
+    setSearchQuery('');
+
     setNewProductName('');
     setNewProductStock('0');
     setIsAddOpen(false);
