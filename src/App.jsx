@@ -7,6 +7,7 @@ import LoginView from './components/LoginView';
 // Import Tab Views
 import DashboardView from './components/DashboardView';
 import InventoryPage from './components/InventoryPage';
+import PurchasesView from './components/PurchasesView';
 import SalesView from './components/SalesView';
 import ReportsView from './components/ReportsView';
 import ExpensesView from './components/ExpensesView';
@@ -30,6 +31,8 @@ function DashboardShell() {
         return <DashboardView />;
       case 'products':
         return <InventoryPage />;
+      case 'purchases':
+        return <PurchasesView />;
       case 'sales':
         return <SalesView />;
       case 'reports':

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingCart,
+  ShoppingBag,
   FileBarChart,
   Users,
   Layers,
@@ -26,6 +27,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard, color: 'text-indigo-500' },
     { id: 'products', name: 'Products', icon: Package, color: 'text-emerald-500' },
+    { id: 'purchases', name: 'Purchase Entry', icon: ShoppingBag, color: 'text-amber-500' },
     { id: 'sales', name: 'Sales Entry', icon: ShoppingCart, color: 'text-sky-500' },
     { id: 'reports', name: 'Sales Reports', icon: FileBarChart, color: 'text-orange-500' },
     { id: 'expenses', name: 'Expenses', icon: Wallet, color: 'text-purple-500' },

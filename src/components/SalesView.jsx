@@ -16,6 +16,7 @@ const SalesView = () => {
     customerAddress: '',
     customerEmail: '',
     customerGstin: '',
+    serialNumber: '',
     productId: '',
     quantity: '1',
     totalAmount: '',
@@ -107,6 +108,7 @@ const SalesView = () => {
         customerAddress: '',
         customerEmail: '',
         customerGstin: '',
+        serialNumber: '',
         productId: '',
         quantity: '1',
         totalAmount: '',
@@ -281,6 +283,22 @@ const SalesView = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+
+                {/* Sr. No. / Serial Number (Optional) */}
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-[10px] font-bold uppercase text-indigo-600 dark:text-indigo-400 flex items-center space-x-1">
+                    <Tag size={10} />
+                    <span>Sr. No. / Serial Number (Optional)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="serialNumber"
+                    value={formData.serialNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g. SN-2026-9912 or Barcode #"
+                    className="w-full px-3.5 py-2.5 border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/25"
+                  />
                 </div>
 
                 {/* Quantity */}

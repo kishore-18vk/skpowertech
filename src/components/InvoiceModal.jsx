@@ -166,7 +166,16 @@ const InvoiceModal = ({ sale, onClose }) => {
                 <tr className="text-slate-700 dark:text-slate-350 hover:bg-slate-50/50 dark:hover:bg-slate-950/20 transition-colors">
                   <td className="py-4 px-4">
                     <span className="font-display font-semibold text-xs text-slate-900 dark:text-white block">{sale.productName}</span>
-                    <span className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider block mt-1">Category: {sale.category}</span>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="text-[9px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
+                        Category: {sale.category}
+                      </span>
+                      {sale.serialNumber && (
+                        <span className="text-[9px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                          Sr. No: {sale.serialNumber}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="py-4 px-4 text-center font-bold text-slate-900 dark:text-white font-mono">{sale.quantity}</td>
                   <td className="py-4 px-4 text-right font-mono">{formatCurrency(unitPrice)}</td>

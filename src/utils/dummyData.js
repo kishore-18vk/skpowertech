@@ -139,6 +139,43 @@ export const initialTickets = [
   }
 ];
 
+export const initialPurchases = [
+  {
+    id: 'pur-1',
+    invoiceNo: 'PUR-2026-001',
+    supplierName: 'V-Guard Industries Ltd',
+    supplierPhone: '9845012345',
+    date: '2026-08-01',
+    paymentStatus: 'Paid',
+    paymentMethod: 'Net Banking',
+    notes: 'Multi-item V-Guard solar heater shipment batch',
+    totalAmount: 187000,
+    totalUnits: 10,
+    items: [
+      { productId: 'p4', productName: 'V-Guard 100 L Pro', category: 'Solar Water Heater', quantity: 5, purchasePrice: 15000, totalAmount: 75000 },
+      { productId: 'p7', productName: 'V-Guard 150 L Pro', category: 'Solar Water Heater', quantity: 3, purchasePrice: 20000, totalAmount: 60000 },
+      { productId: 'p9', productName: 'V-Guard 200 L Pro', category: 'Solar Water Heater', quantity: 2, purchasePrice: 26000, totalAmount: 52000 }
+    ]
+  },
+  {
+    id: 'pur-2',
+    invoiceNo: 'PUR-2026-002',
+    supplierName: 'Sudarson Solar Systems',
+    supplierPhone: '9740054321',
+    date: '2026-08-03',
+    paymentStatus: 'Paid',
+    paymentMethod: 'UPI',
+    notes: 'Sudarson 100, 150, and 200 Ltr batch purchase order',
+    totalAmount: 163500,
+    totalUnits: 8,
+    items: [
+      { productId: 'p3', productName: 'Sudarson / SNR 100 Ltr', category: 'Solar Water Heater', quantity: 3, purchasePrice: 14000, totalAmount: 42000 },
+      { productId: 'p2', productName: 'Sudarson / SNR 150 Ltr', category: 'Solar Water Heater', quantity: 3, purchasePrice: 18500, totalAmount: 55500 },
+      { productId: 'p1', productName: 'Sudarson / SNR 200 Ltr', category: 'Solar Water Heater', quantity: 2, purchasePrice: 23000, totalAmount: 46000 }
+    ]
+  }
+];
+
 export const initialLogs = [
   {
     id: "log-1",
@@ -147,3 +184,4 @@ export const initialLogs = [
     timestamp: "2026-07-11T12:00:00Z"
   }
 ];
+

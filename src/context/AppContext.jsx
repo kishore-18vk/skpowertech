@@ -3,12 +3,24 @@ import { productService } from '../services/productService';
 import { salesService } from '../services/salesService';
 import { authService } from '../services/authService';
 import { generateSystemAlerts } from '../utils/helpers';
+import { initialPurchases } from '../utils/dummyData';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [sales, setSales] = useState([]);
+  const [purchases, setPurchases] = useState(() => {
+    const saved = localStorage.getItem('sk_purchases');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse local purchases:", e);
+      }
+    }
+    return initialPurchases;
+  });
   const [loading, setLoading] = useState(true);
 
   // Keep these layout states exactly as they were
@@ -226,6 +238,10 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('sk_expenses', JSON.stringify(expenses));
   }, [expenses]);
 
+  useEffect(() => {
+    localStorage.setItem('sk_purchases', JSON.stringify(purchases));
+  }, [purchases]);
+
   const addExpense = (expenseData) => {
     const newExp = {
       id: `exp-${Date.now()}`,
@@ -254,6 +270,114 @@ export const AppProvider = ({ children }) => {
     localStorage.removeItem('sk_expenses');
   };
 
+  // Purchase Management Functions
+  const addPurchase = async (purchaseData) => {
+    const itemsList = purchaseData.items && purchaseData.items.length > 0 
+      ? purchaseData.items 
+      : [{
+          productId: purchaseData.productId,
+          productName: purchaseData.productName,
+          category: purchaseData.category,
+          quantity: purchaseData.quantity,
+          purchasePrice: purchaseData.purchasePrice,
+          totalAmount: purchaseData.totalAmount
+        }];
+
+    let processedItems = [];
+    let grandTotal = 0;
+    let totalUnitsCount = 0;
+
+    let updatedProductsCatalog = [...products];
+
+    for (const rawItem of itemsList) {
+      if (!rawItem.productId) continue;
+
+      const prodIndex = updatedProductsCatalog.findIndex(p => p.id === rawItem.productId);
+      const qty = parseInt(rawItem.quantity) || 0;
+      const unitPrice = parseFloat(rawItem.purchasePrice) || 0;
+      const rowTotal = parseFloat(rawItem.totalAmount) || (qty * unitPrice);
+
+      grandTotal += rowTotal;
+      totalUnitsCount += qty;
+
+      if (prodIndex !== -1 && qty > 0) {
+        const targetProd = updatedProductsCatalog[prodIndex];
+        const newStock = (parseInt(targetProd.stock) || 0) + qty;
+        
+        const updatedProd = {
+          ...targetProd,
+          stock: newStock,
+          purchasePrice: unitPrice > 0 ? unitPrice : targetProd.purchasePrice
+        };
+
+        updatedProductsCatalog[prodIndex] = updatedProd;
+
+        // Persist product stock update to Supabase / LocalStorage
+        try {
+          await productService.updateProduct(targetProd.id, {
+            stock: newStock,
+            purchasePrice: updatedProd.purchasePrice
+          });
+        } catch (e) {
+          console.warn("Failed persisting stock update to database:", e);
+        }
+
+        processedItems.push({
+          productId: rawItem.productId,
+          productName: targetProd.name,
+          category: targetProd.category,
+          brand: targetProd.brand,
+          quantity: qty,
+          purchasePrice: unitPrice,
+          totalAmount: rowTotal
+        });
+      } else {
+        processedItems.push({
+          productId: rawItem.productId,
+          productName: rawItem.productName || 'Equipment Item',
+          category: rawItem.category || 'General',
+          brand: rawItem.brand || '',
+          quantity: qty,
+          purchasePrice: unitPrice,
+          totalAmount: rowTotal
+        });
+      }
+    }
+
+    if (processedItems.length === 0) {
+      return { success: false, error: "No valid product items selected for purchase." };
+    }
+
+    // Immediately update products state so Products page reflects updated stock!
+    setProducts(updatedProductsCatalog);
+
+    const newPurchase = {
+      id: `pur-${Date.now()}`,
+      invoiceNo: purchaseData.invoiceNo || `PUR-${Date.now().toString().slice(-6)}`,
+      supplierName: purchaseData.supplierName || 'General Supplier',
+      supplierPhone: purchaseData.supplierPhone || '',
+      date: purchaseData.date || new Date().toISOString().split('T')[0],
+      paymentStatus: purchaseData.paymentStatus || 'Paid',
+      paymentMethod: purchaseData.paymentMethod || 'Net Banking',
+      notes: purchaseData.notes || '',
+      items: processedItems,
+      totalAmount: grandTotal,
+      totalUnits: totalUnitsCount
+    };
+
+    setPurchases(prev => [newPurchase, ...prev]);
+    return { success: true, purchase: newPurchase };
+  };
+
+  const deletePurchase = (id) => {
+    setPurchases(prev => prev.filter(p => p.id !== id));
+  };
+
+  const clearAllPurchases = () => {
+    setPurchases([]);
+    localStorage.removeItem('sk_purchases');
+  };
+
   // Keep analytical alert engines computing identically to standard specifications
   const alerts = generateSystemAlerts(products, sales, []);
 
@@ -270,6 +394,7 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{
       products,
       sales,
+      purchases,
       expenses,
       dealers: [], // preserves empty layouts gracefully
       tickets: [], 
@@ -290,6 +415,9 @@ export const AppProvider = ({ children }) => {
       updateSalePaymentStatus,
       deleteSale,
       clearAllSales,
+      addPurchase,
+      deletePurchase,
+      clearAllPurchases,
       addExpense,
       updateExpense,
       deleteExpense,
