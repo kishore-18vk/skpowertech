@@ -33,12 +33,8 @@ export const productService = {
     let localProducts = saved ? JSON.parse(saved) : [];
 
     if (dbProducts.length > 0) {
-      // Merge local-only products (e.g. ones with 'p_' id or not in dbProducts)
-      const dbIds = new Set(dbProducts.map(p => p.id));
-      const localOnly = localProducts.filter(p => !dbIds.has(p.id));
-      const combined = [...dbProducts, ...localOnly];
-      localStorage.setItem('sk_products', JSON.stringify(combined));
-      return combined;
+      localStorage.setItem('sk_products', JSON.stringify(dbProducts));
+      return dbProducts;
     }
 
     if (localProducts.length > 0) {

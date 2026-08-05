@@ -16,7 +16,8 @@ import {
   Moon,
   Menu,
   X,
-  LogOut
+  LogOut,
+  Wallet
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -27,6 +28,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     { id: 'products', name: 'Products', icon: Package, color: 'text-emerald-500' },
     { id: 'sales', name: 'Sales Entry', icon: ShoppingCart, color: 'text-sky-500' },
     { id: 'reports', name: 'Sales Reports', icon: FileBarChart, color: 'text-orange-500' },
+    { id: 'expenses', name: 'Expenses', icon: Wallet, color: 'text-purple-500' },
   ];
 
   return (

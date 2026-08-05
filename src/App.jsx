@@ -9,6 +9,7 @@ import DashboardView from './components/DashboardView';
 import InventoryPage from './components/InventoryPage';
 import SalesView from './components/SalesView';
 import ReportsView from './components/ReportsView';
+import ExpensesView from './components/ExpensesView';
 
 function DashboardShell() {
   const { activeTab, auth, login } = useContext(AppContext);
@@ -33,6 +34,8 @@ function DashboardShell() {
         return <SalesView />;
       case 'reports':
         return <ReportsView />;
+      case 'expenses':
+        return <ExpensesView />;
       default:
         return <DashboardView />;
     }

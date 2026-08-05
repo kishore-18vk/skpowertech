@@ -193,6 +193,69 @@ export const AppProvider = ({ children }) => {
   const clearProducts = () => console.warn("Operation restricted inside active production database configuration context.");
   const factoryReset = () => console.warn("Reset operations restricted within secure relational environments.");
 
+  // Expense Management State
+  const defaultExpenses = [
+    { id: 'exp-1', date: '2026-08-01', category: 'Office Rent', subCategory: 'Mukkonam', title: 'Office Rent - Mukkonam', amount: 0, notes: 'Monthly rent for Mukkonam office' },
+    { id: 'exp-2', date: '2026-08-01', category: 'Office Rent', subCategory: 'Udumalai', title: 'Office Rent - Udumalai', amount: 0, notes: 'Monthly rent for Udumalai branch' },
+    { id: 'exp-3', date: '2026-08-01', category: 'Office Rent', subCategory: 'Tirupur', title: 'Office Rent - Tirupur', amount: 0, notes: 'Monthly rent for Tirupur branch' },
+    { id: 'exp-4', date: '2026-08-02', category: 'Fuel', subCategory: 'CNG', title: 'Vehicle CNG Filling', amount: 0, notes: 'Transport vehicle fuel' },
+    { id: 'exp-5', date: '2026-08-02', category: 'Fuel', subCategory: 'Petrol', title: 'Service Bike Petrol', amount: 0, notes: 'Field staff bike fuel' },
+    { id: 'exp-6', date: '2026-08-03', category: 'Food', subCategory: 'Daily Food', title: 'Staff Lunch & Tea', amount: 0, notes: 'Daily refreshments' },
+    { id: 'exp-7', date: '2026-08-03', category: 'Stationery', subCategory: 'Office Stationery', title: 'Stationery & Printing', amount: 0, notes: 'Paper, pens, bill books' },
+    { id: 'exp-8', date: '2026-08-04', category: 'Salary', subCategory: 'Staff Salary', title: 'Staff Monthly Salary', amount: 0, notes: 'Technician and sales staff salaries' },
+    { id: 'exp-9', date: '2026-08-04', category: 'Vehicle & Machine Service', subCategory: 'Eco Service', title: 'Eco Vehicle Service', amount: 0, notes: 'Vehicle maintenance service' },
+    { id: 'exp-10', date: '2026-08-04', category: 'Vehicle & Machine Service', subCategory: 'Unicorn Service', title: 'Unicorn Service', amount: 0, notes: 'Machine / bike service' },
+    { id: 'exp-11', date: '2026-08-04', category: 'Vehicle & Machine Service', subCategory: 'Ather Service', title: 'Ather EV Service', amount: 0, notes: 'EV scooter service' },
+    { id: 'exp-12', date: '2026-08-05', category: 'EB Bill', subCategory: 'Total 3 Office', title: 'EB Bill (Total 3 Office)', amount: 0, notes: 'Electricity bill for 3 office spaces' },
+    { id: 'exp-13', date: '2026-08-05', category: 'Transport & Logistics', subCategory: 'Transport', title: 'Goods Freight Transport', amount: 0, notes: 'Solar & Purifier logistics' },
+    { id: 'exp-14', date: '2026-08-05', category: 'Transport & Logistics', subCategory: 'Courier', title: 'Parcel Courier Charges', amount: 0, notes: 'Spare parts courier' },
+    { id: 'exp-15', date: '2026-08-05', category: 'Transport & Logistics', subCategory: 'Bus Courier', title: 'Bus Courier Freight', amount: 0, notes: 'Urgent bus courier dispatch' },
+  ];
+
+  const [expenses, setExpenses] = useState(() => {
+    const saved = localStorage.getItem('sk_expenses');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse local expenses:", e);
+      }
+    }
+    return defaultExpenses;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sk_expenses', JSON.stringify(expenses));
+  }, [expenses]);
+
+  const addExpense = (expenseData) => {
+    const newExp = {
+      id: `exp-${Date.now()}`,
+      date: expenseData.date || new Date().toISOString().substring(0, 10),
+      category: expenseData.category || 'General',
+      subCategory: expenseData.subCategory || '',
+      title: expenseData.title || expenseData.category,
+      amount: parseFloat(expenseData.amount) || 0,
+      notes: expenseData.notes || '',
+      createdAt: new Date().toISOString()
+    };
+    setExpenses(prev => [newExp, ...prev]);
+    return newExp;
+  };
+
+  const updateExpense = (id, updatedData) => {
+    setExpenses(prev => prev.map(e => e.id === id ? { ...e, ...updatedData } : e));
+  };
+
+  const deleteExpense = (id) => {
+    setExpenses(prev => prev.filter(e => e.id !== id));
+  };
+
+  const clearAllExpenses = () => {
+    setExpenses([]);
+    localStorage.removeItem('sk_expenses');
+  };
+
   // Keep analytical alert engines computing identically to standard specifications
   const alerts = generateSystemAlerts(products, sales, []);
 
@@ -209,6 +272,7 @@ export const AppProvider = ({ children }) => {
     <AppContext.Provider value={{
       products,
       sales,
+      expenses,
       dealers: [], // preserves empty layouts gracefully
       tickets: [], 
       logs: [],
@@ -228,6 +292,10 @@ export const AppProvider = ({ children }) => {
       updateSalePaymentStatus,
       deleteSale,
       clearAllSales,
+      addExpense,
+      updateExpense,
+      deleteExpense,
+      clearAllExpenses,
       loadDemoData,
       factoryReset
     }}>
