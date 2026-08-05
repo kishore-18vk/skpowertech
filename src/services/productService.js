@@ -87,7 +87,7 @@ export const productService = {
 
     if (!createdProduct) {
       createdProduct = {
-        id: 'p_' + Date.now(),
+        id: generatedId,
         ...productData,
         stock: parseInt(productData.stock) || 0,
         purchasePrice: parseFloat(productData.purchasePrice) || 0,

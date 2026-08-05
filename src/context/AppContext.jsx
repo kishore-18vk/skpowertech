@@ -92,12 +92,10 @@ export const AppProvider = ({ children }) => {
       const created = await productService.createProduct(productData);
       if (created) {
         setProducts(prev => {
-          if (prev.some(p => p.id === created.id)) return prev;
-          return [...prev, created];
+          const filtered = prev.filter(p => p.id !== created.id);
+          return [created, ...filtered];
         });
       }
-      const freshData = await productService.getAllProducts();
-      setProducts(freshData);
     } catch (err) {
       console.error("Failed to add catalog item row:", err);
     }
