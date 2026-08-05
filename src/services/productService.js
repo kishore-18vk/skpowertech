@@ -60,9 +60,7 @@ export const productService = {
           category: productData.category,
           stock: parseInt(productData.stock) || 0,
           purchase_price: parseFloat(productData.purchasePrice) || 0,
-          selling_price: parseFloat(productData.sellingPrice) || 0,
-          low_stock_threshold: parseInt(productData.lowStockThreshold) || 3,
-          image: productData.image || ''
+          selling_price: parseFloat(productData.sellingPrice) || 0
         }])
         .select();
 
